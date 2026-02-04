@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Comparador de listas</title>
+  <title>Comparador de listas online — eliminar duplicados y encontrar diferencias</title>
+  <meta name="description" content="Comparador de listas gratuito. Pega dos listas, elimina duplicados, encuentra intersecciones y exporta. Rápido, privado y sin instalación.">
+  <link rel="canonical" href="https://yourdomain.com/compare-list">
+  <meta property="og:title" content="Comparador de listas online — eliminar duplicados y encontrar diferencias">
+  <meta property="og:description" content="Pega dos listas y obtén diferencias, intersecciones y duplicados al instante. Exporta CSV/JSON. Rápido, privado y sin instalaciones.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -63,7 +69,20 @@
 <body>
   <div class="container">
     <h1>Comparador de listas</h1>
-    <p class="small">Pega una lista por línea en cada campo. Usa las opciones para normalizar elementos (trim, lowercase) y pulsa "Comparar".</p>
+    <p class="small">Pega una lista por línea en cada campo. Usa las opciones para normalizar elementos (trim, lowercase). La herramienta muestra diferencias, intersecciones y duplicados al instante. No requiere registro.</p>
+    <!-- Structured data: FAQ + SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type":"Question","name":"¿La herramienta guarda mis listas?","acceptedAnswer":{"@type":"Answer","text":"No, los datos solo quedan en tu navegador y no se envían por defecto a ningún servidor."}},
+        {"@type":"Question","name":"¿Puedo exportar los resultados?","acceptedAnswer":{"@type":"Answer","text":"Sí — puedes copiar y pegar los resultados; en próximas versiones añadiremos export a CSV/JSON."}},
+        {"@type":"Question","name":"¿Funciona en móviles?","acceptedAnswer":{"@type":"Answer","text":"Sí, la interfaz responde a pantallas pequeñas y puedes usarla desde el navegador móvil."}},
+        {"@type":"Question","name":"¿La comparación distingue mayúsculas?","acceptedAnswer":{"@type":"Answer","text":"Hay una opción 'Lowercase' para normalizar mayúsculas/minúsculas antes de comparar."}}
+      ]
+    }
+    </script>
 
     <div class="cols">
     <div>
