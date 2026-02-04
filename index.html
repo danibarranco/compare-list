@@ -190,12 +190,27 @@ Mandarina</textarea>
       const dupB = [...counts(b)].filter(([k,v])=>v>1).map(([k,v])=>`${k} (x${v})`);
       const dupAll = uniq(dupA.concat(dupB));
 
-      document.getElementById('diffA').textContent = diffA.length?diffA.join('\n'):'(ninguno)';
-      document.getElementById('diffB').textContent = diffB.length?diffB.join('\n'):'(ninguno)';
-      document.getElementById('inter').textContent = inter.length?inter.join('\n'):'(ninguno)';
-      document.getElementById('dupsA').textContent = dupA.length?dupA.join('\n'):'(ninguno)';
-      document.getElementById('dupsB').textContent = dupB.length?dupB.join('\n'):'(ninguno)';
-      document.getElementById('dups').textContent = dupAll.length?dupAll.join('\n'):'(ninguno)';
+      // helper to update panel content and reset copied state when content changes
+      function setPanel(id, text){
+        const el = document.getElementById(id);
+        const prev = el.dataset.lastOutput || '';
+        if(prev !== text){
+          // content changed -> clear persisted copied state for this panel
+          try{ localStorage.removeItem('listCompare.lastCopied'); }catch(e){}
+          localStorage.removeItem(`listCompare.lastCopiedAt:${id}`);
+          // reset any UI state for the copy button and note
+          const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===id);
+          if(btn){ btn.classList.remove('copied'); btn.innerText='Copiar'; const note = btn.closest('.actions')?.querySelector('.copied-note'); if(note) note.textContent=''; }
+        }
+        el.textContent = text;
+        el.dataset.lastOutput = text;
+      }
+      setPanel('diffA', diffA.length?diffA.join('\n'):'(ninguno)');
+      setPanel('diffB', diffB.length?diffB.join('\n'):'(ninguno)');
+      setPanel('inter', inter.length?inter.join('\n'):'(ninguno)');
+      setPanel('dupsA', dupA.length?dupA.join('\n'):'(ninguno)');
+      setPanel('dupsB', dupB.length?dupB.join('\n'):'(ninguno)');
+      setPanel('dups', dupAll.length?dupAll.join('\n'):'(ninguno)');
 
       // update counts in headings
       document.getElementById('countDiffA').textContent = `(${diffA.length})`;
