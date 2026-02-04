@@ -32,7 +32,13 @@
 
   <div class="cols">
     <div>
-      <label><strong>Lista A</strong></label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label><strong>Lista A</strong></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="small">Total: <span id="totalA">0</span></span>
+          <button id="clearA" class="secondary" title="Limpiar lista A">Limpiar A</button>
+        </div>
+      </div>
       <textarea id="listA" placeholder="Elemento 1\nElemento 2\n...">Manzana
 Pera
 Plátano
@@ -41,7 +47,13 @@ Kiwi
 Manzana</textarea>
     </div>
     <div>
-      <label><strong>Lista B</strong></label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label><strong>Lista B</strong></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="small">Total: <span id="totalB">0</span></span>
+          <button id="clearB" class="secondary" title="Limpiar lista B">Limpiar B</button>
+        </div>
+      </div>
       <textarea id="listB" placeholder="Elemento 1\nElemento 2\n...">pera
 Uva
 Manzana
@@ -114,10 +126,16 @@ Mandarina</textarea>
 
     function compare(){
       const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked}
-      const a = parse(document.getElementById('listA').value, opts);
-      const b = parse(document.getElementById('listB').value, opts);
+      const aRaw = document.getElementById('listA').value;
+      const bRaw = document.getElementById('listB').value;
+      const a = parse(aRaw, opts);
+      const b = parse(bRaw, opts);
       const setA = new Set(a);
       const setB = new Set(b);
+
+      // totals (after normalization)
+      document.getElementById('totalA').textContent = a.length;
+      document.getElementById('totalB').textContent = b.length;
 
       const diffA = [...setA].filter(x=>!setB.has(x));
       const diffB = [...setB].filter(x=>!setA.has(x));
@@ -136,14 +154,7 @@ Mandarina</textarea>
       document.getElementById('countDiffA').textContent = `(${diffA.length})`;
       document.getElementById('countDiffB').textContent = `(${diffB.length})`;
       document.getElementById('countInter').textContent = `(${inter.length})`;
-      document.getElementById('dups').dataset.count = dupAll.length; // keep raw number if needed
-      const dupCountEl = document.getElementById('dups');
-      // show count on heading for duplicates (we'll find the h3 sibling)
-      const dupHeading = document.querySelector('.card h3#h3Dups');
-      if(dupHeading){
-        const dupCountSpan = document.getElementById('countDups');
-        if(dupCountSpan) dupCountSpan.textContent = `(${dupAll.length})`;
-      }
+      document.getElementById('countDups').textContent = `(${dupAll.length})`;
     }
 
     document.getElementById('compare').addEventListener('click', compare);
@@ -166,6 +177,10 @@ Mandarina</textarea>
     }
     taA.addEventListener('keydown', handleKey);
     taB.addEventListener('keydown', handleKey);
+
+    // clear individual lists
+    document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
+    document.getElementById('clearB').addEventListener('click', ()=>{document.getElementById('listB').value=''; compare();});
 
     // initial compare
     compare();
