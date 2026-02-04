@@ -49,6 +49,7 @@
         <div style="display:flex;gap:8px;align-items:center">
           <span class="small">Total: <span id="totalA">0</span></span>
           <button id="clearA" class="secondary" title="Limpiar lista A">Limpiar A</button>
+          <button id="sortA" class="secondary" title="Ordenar lista A">Ordenar A</button>
         </div>
       </div>
       <textarea id="listA" placeholder="Elemento 1\nElemento 2\n...">Manzana
@@ -64,6 +65,7 @@ Manzana</textarea>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="small">Total: <span id="totalB">0</span></span>
           <button id="clearB" class="secondary" title="Limpiar lista B">Limpiar B</button>
+          <button id="sortB" class="secondary" title="Ordenar lista B">Ordenar B</button>
         </div>
       </div>
       <textarea id="listB" placeholder="Elemento 1\nElemento 2\n...">pera
@@ -227,6 +229,22 @@ Mandarina</textarea>
       const b = parse(document.getElementById('listB').value, opts);
       const unique = uniq(b);
       document.getElementById('listB').value = unique.join('\n');
+      compare();
+    });
+
+    // sort list A/B (alphabetical)
+    document.getElementById('sortA').addEventListener('click', ()=>{
+      const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
+      const a = parse(document.getElementById('listA').value, opts);
+      a.sort((x,y)=>x.localeCompare(y, undefined, {sensitivity: 'base'}));
+      document.getElementById('listA').value = a.join('\n');
+      compare();
+    });
+    document.getElementById('sortB').addEventListener('click', ()=>{
+      const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
+      const b = parse(document.getElementById('listB').value, opts);
+      b.sort((x,y)=>x.localeCompare(y, undefined, {sensitivity: 'base'}));
+      document.getElementById('listB').value = b.join('\n');
       compare();
     });
 
