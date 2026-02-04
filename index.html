@@ -211,7 +211,8 @@ Mandarina</textarea>
       document.getElementById('countDupsAll').textContent = `(${dupAll.length})`;
     }
 
-    document.getElementById('compare').addEventListener('click', compare);
+    const compareBtn = document.getElementById('compare');
+    if(compareBtn) compareBtn.addEventListener('click', compare);
     document.getElementById('clear').addEventListener('click', ()=>{document.getElementById('listA').value='';document.getElementById('listB').value='';compare();});
     document.getElementById('swap').addEventListener('click', ()=>{const a = document.getElementById('listA').value;document.getElementById('listA').value = document.getElementById('listB').value;document.getElementById('listB').value = a;compare();});
 
