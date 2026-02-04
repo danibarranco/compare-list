@@ -330,6 +330,15 @@ Mandarina</textarea>
     // ensure initial compare runs after DOM ready
     window.addEventListener('load', compare);
 
+    // refresh per-card "Último" notes every 10s
+    setInterval(()=>{
+      Array.from(document.querySelectorAll('.copy')).forEach(b=>{
+        const target = b.dataset.target;
+        const at = localStorage.getItem(`listCompare.lastCopiedAt:${target}`);
+        if(at) updateCardNote(target, Number(at));
+      });
+    }, 10000);
+
     // clear individual lists
     document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
     document.getElementById('clearB').addEventListener('click', ()=>{document.getElementById('listB').value=''; compare();});
