@@ -47,7 +47,9 @@
     /* toast */
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 92%, var(--accent) 2%),var(--surface));padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--surface) 60%, black 6%);box-shadow:0 12px 30px rgba(11,13,20,0.35);color:var(--text);display:none;z-index:999}
     [data-theme="dark"] .toast{box-shadow:none;border-color:color-mix(in srgb,var(--surface) 50%, black 18%)}
-    .card .copied-note{font-size:0.8rem;color:color-mix(in srgb,var(--muted) 80%, var(--text) 20%);margin-top:8px}
+    .card .copied-note{font-size:0.8rem;color:color-mix(in srgb,var(--muted) 80%, var(--text) 20%);margin-top:0;display:inline-block}
+    .card .actions{display:flex;align-items:center;gap:8px}
+
     @media (max-width:700px){
       .cols{grid-template-columns:1fr;gap:12px}
       .results{grid-template-columns:1fr}
@@ -227,9 +229,9 @@ Mandarina</textarea>
         document.querySelectorAll('.copy').forEach(b=>{ b.classList.remove('copied'); if(b !== el) b.innerText='Copiar'; clearTimeout(b._revertTimer); });
         el.classList.add('copied');
         el.innerText = '✓ Copiado';
-        // schedule revert of button back to 'Copiar' after 10s, but keep the note persisted
+        // schedule revert of button back to 'Copiar' after 2s, but keep the note persisted
         clearTimeout(el._revertTimer);
-        el._revertTimer = setTimeout(()=>{ el.classList.remove('copied'); el.innerText='Copiar'; }, 10000);
+        el._revertTimer = setTimeout(()=>{ el.classList.remove('copied'); el.innerText='Copiar'; }, 2000);
         // update small note inside the card
         updateCardNote(targetId, now);
         // show toast
@@ -239,7 +241,7 @@ Mandarina</textarea>
     // restore copied state on load if any
     (function restoreCopied(){
       const last = localStorage.getItem('listCompare.lastCopied');
-      const TEN = 10000; // ms to keep button in 'copied' state
+      const TEN = 2000; // ms to keep button in 'copied' state
       if(last){
         const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===last);
         const at = localStorage.getItem(`listCompare.lastCopiedAt:${last}`);
@@ -276,9 +278,12 @@ Mandarina</textarea>
       if(!actions) return;
       let note = actions.querySelector('.copied-note');
       if(!note){ note = document.createElement('div'); note.className='copied-note'; note.style.marginLeft='10px'; actions.appendChild(note); }
-      const d = new Date(ts);
-      const hh = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      note.textContent = `Último: ${hh}`;
+      const age = Math.floor((Date.now() - ts) / 1000);
+      let txt = '';
+      if(age < 60) txt = `hace ${age}s`;
+      else if(age < 3600) txt = `hace ${Math.floor(age/60)}m`;
+      else txt = `hace ${Math.floor(age/3600)}h`;
+      note.textContent = txt;
     }
 
     // theme handling: detect prefers-color-scheme and allow toggle
