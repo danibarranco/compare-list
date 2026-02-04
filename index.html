@@ -100,10 +100,8 @@ Mandarina</textarea>
     <label class="small"><input type="checkbox" id="trim" checked> Trim</label>
     <label class="small"><input type="checkbox" id="lower" checked> Lowercase</label>
     <label class="small"><input type="checkbox" id="ignoreEmpty" checked> Ignorar líneas vacías</label>
-    <button id="compare">Comparar</button>
     <button id="clear" class="secondary">Limpiar</button>
     <button id="swap" class="secondary">Intercambiar</button>
-    <div class="small" style="align-self:center">Atajo: Ctrl/Cmd + Enter para comparar</div>
     <button id="themeToggle" class="theme-toggle" title="Alternar tema">Tema</button>
   </div>
 
@@ -308,19 +306,9 @@ Mandarina</textarea>
     // initialize theme button state
     updateThemeButton();
 
-    // keyboard shortcut: Ctrl/Cmd + Enter inside either textarea triggers compare
+    // Debounced real-time compare: run compare on input changes
     const taA = document.getElementById('listA');
     const taB = document.getElementById('listB');
-    function handleKey(e){
-      if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
-        e.preventDefault();
-        compare();
-      }
-    }
-    taA.addEventListener('keydown', handleKey);
-    taB.addEventListener('keydown', handleKey);
-
-    // Debounced real-time compare: hide the compare button and run compare on input changes
     function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), wait); }; }
     const debouncedCompare = debounce(()=>{ compare(); }, 300);
     // enable realtime mode (adds class to container to hide compare button)
