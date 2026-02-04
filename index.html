@@ -321,6 +321,14 @@ Mandarina</textarea>
     // attach input listeners to textareas to trigger debounced compare and update totals in real time
     taA.addEventListener('input', ()=>{ debouncedCompare(); });
     taB.addEventListener('input', ()=>{ debouncedCompare(); });
+    // also handle paste/drop to run compare immediately
+    taA.addEventListener('paste', ()=>{ setTimeout(compare, 50); });
+    taB.addEventListener('paste', ()=>{ setTimeout(compare, 50); });
+    taA.addEventListener('drop', ()=>{ setTimeout(compare, 50); });
+    taB.addEventListener('drop', ()=>{ setTimeout(compare, 50); });
+
+    // ensure initial compare runs after DOM ready
+    window.addEventListener('load', compare);
 
     // clear individual lists
     document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
