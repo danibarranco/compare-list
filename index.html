@@ -19,6 +19,9 @@
     .results{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .card{background:#ffffff;padding:16px;border-radius:12px;box-shadow:0 10px 30px rgba(12,12,30,0.06);min-height:140px;border:1px solid rgba(15,15,20,0.03)}
     .card h3{margin:0 0 8px;font-size:1rem;color:#111}
+    /* highlight center column */
+    .card.center{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid rgba(107,92,231,0.06)}
+    .muted{color:#6b6b6b}
     pre{white-space:pre-wrap;margin:0;font-family:inherit;color:#222}
     .footer{margin-top:22px;color:#666;font-size:0.95rem}
     .small{font-size:0.9rem;color:#555}
@@ -81,8 +84,8 @@ Mandarina</textarea>
       <pre id="diffA">-</pre>
       <div style="margin-top:8px"><button data-target="diffA" class="copy">Copiar</button></div>
     </div>
-    <div class="card">
-      <h3 id="h3Inter">Intersección <span class="small" id="countInter">(0)</span></h3>
+    <div class="card center">
+      <h3 id="h3Inter">Intersección <span class="small" id="countInter">(0)</span> <span class="muted" id="pctInter"></span></h3>
       <pre id="inter">-</pre>
       <div style="margin-top:8px"><button data-target="inter" class="copy">Copiar</button></div>
     </div>
@@ -97,9 +100,9 @@ Mandarina</textarea>
     <div class="card">
       <h3 id="h3DupsA">Duplicados A <span class="small" id="countDupsA">(0)</span></h3>
       <pre id="dupsA">-</pre>
-      <div style="margin-top:8px"><button data-target="dupsA" class="copy">Copiar</button></div>
+      <div style="margin-top:8px"><button data-target="dupsA" class="copy">Copiar</button> <button id="dedupeA" class="secondary">Eliminar duplicados A</button></div>
     </div>
-    <div class="card">
+    <div class="card center">
       <h3 id="h3DupsAll">Duplicados (ambas) <span class="small" id="countDupsAll">(0)</span></h3>
       <pre id="dups">-</pre>
       <div style="margin-top:8px"><button data-target="dups" class="copy">Copiar</button></div>
@@ -107,7 +110,7 @@ Mandarina</textarea>
     <div class="card">
       <h3 id="h3DupsB">Duplicados B <span class="small" id="countDupsB">(0)</span></h3>
       <pre id="dupsB">-</pre>
-      <div style="margin-top:8px"><button data-target="dupsB" class="copy">Copiar</button></div>
+      <div style="margin-top:8px"><button data-target="dupsB" class="copy">Copiar</button> <button id="dedupeB" class="secondary">Eliminar duplicados B</button></div>
     </div>
   </div>
 
@@ -168,6 +171,11 @@ Mandarina</textarea>
       document.getElementById('countDiffA').textContent = `(${diffA.length})`;
       document.getElementById('countDiffB').textContent = `(${diffB.length})`;
       document.getElementById('countInter').textContent = `(${inter.length})`;
+      // percentages relative to totals
+      const pctA = a.length? Math.round((inter.length / a.length)*100) : 0;
+      const pctB = b.length? Math.round((inter.length / b.length)*100) : 0;
+      document.getElementById('pctInter').textContent = `— ${pctA}% de A · ${pctB}% de B`;
+
       document.getElementById('countDupsA').textContent = `(${dupA.length})`;
       document.getElementById('countDupsB').textContent = `(${dupB.length})`;
       document.getElementById('countDupsAll').textContent = `(${dupAll.length})`;
@@ -197,6 +205,22 @@ Mandarina</textarea>
     // clear individual lists
     document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
     document.getElementById('clearB').addEventListener('click', ()=>{document.getElementById('listB').value=''; compare();});
+
+    // remove duplicates from a list (keep first occurrence)
+    document.getElementById('dedupeA').addEventListener('click', ()=>{
+      const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
+      const a = parse(document.getElementById('listA').value, opts);
+      const unique = uniq(a);
+      document.getElementById('listA').value = unique.join('\n');
+      compare();
+    });
+    document.getElementById('dedupeB').addEventListener('click', ()=>{
+      const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
+      const b = parse(document.getElementById('listB').value, opts);
+      const unique = uniq(b);
+      document.getElementById('listB').value = unique.join('\n');
+      compare();
+    });
 
     // initial compare
     compare();
