@@ -6,7 +6,7 @@
   <title>Comparador de listas</title>
   <style>
     :root{--bg:#f7f6fb;--surface:#ffffff;--muted:#6b6b6b;--text:#0f1720;--accent:#7c59f2;--card-shadow:0 8px 24px rgba(12,12,30,0.06);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;margin:0}
-    [data-theme="dark"]{--bg:#071025;--surface:#0b0f14;--muted:#95a0b8;--text:#e6eef8;--accent:#8f7bf8;--card-shadow:0 18px 48px rgba(0,0,0,0.6)}
+    [data-theme="dark"]{--bg:#071025;--surface:#0b0f14;--muted:#95a0b8;--text:#e6eef8;--accent:#7c59f2;--card-shadow:none}
     body{padding:24px;background:var(--bg);color:var(--text);transition:background .2s ease,color .2s ease}
     h1{margin:0 0 12px}
     .container{max-width:1100px;margin:0 auto}
@@ -26,6 +26,8 @@
     .results{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .controls{margin-bottom:18px}
     .card{background:var(--surface);padding:16px;border-radius:12px;box-shadow:var(--card-shadow);min-height:140px;border:1px solid color-mix(in srgb,var(--surface) 60%, black 6%)}
+    /* remove heavy shadow in dark mode for flatter card */
+    [data-theme="dark"] .card{box-shadow:none;border-color:color-mix(in srgb,var(--surface) 50%, black 12%)}
     .card h3{margin:0 0 8px;font-size:1rem;color:var(--text);font-weight:600}
     /* fixed card height with internal scroll for long content */
     .card{max-height:220px;display:flex;flex-direction:column}
@@ -206,19 +208,28 @@ Mandarina</textarea>
     document.getElementById('swap').addEventListener('click', ()=>{const a = document.getElementById('listA').value;document.getElementById('listA').value = document.getElementById('listB').value;document.getElementById('listB').value = a;compare();});
 
     document.querySelectorAll('.copy').forEach(btn=>btn.addEventListener('click', async e=>{
-      const t = document.getElementById(e.currentTarget.dataset.target).textContent;
+      const targetId = e.currentTarget.dataset.target;
+      const t = document.getElementById(targetId).textContent;
       const el = e.currentTarget;
-      try{ 
+      try{
         await navigator.clipboard.writeText(t);
-        // visual state: set copied class and text
+        // persist which panel was copied
+        localStorage.setItem('listCompare.lastCopied', targetId);
+        // visual state: set copied class and show check
         el.classList.add('copied');
-        const prev = el.textContent;
-        el.textContent = 'Copiado';
-        // keep green state briefly then revert
+        el.innerText = '✓ Copiado';
+        // clear any timer
         clearTimeout(el._copiedTimer);
-        el._copiedTimer = setTimeout(()=>{ el.classList.remove('copied'); el.textContent = prev; }, 2000);
+        // leave state persistent (don't auto-revert) — other copies will override
       }catch(err){alert('No se pudo copiar. Usa selección y ctrl+c');}
     }));
+    // restore copied state on load if any
+    (function restoreCopied(){
+      const last = localStorage.getItem('listCompare.lastCopied');
+      if(!last) return;
+      const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===last);
+      if(btn){ btn.classList.add('copied'); btn.innerText = '✓ Copiado'; }
+    })();
 
     // theme handling: detect prefers-color-scheme and allow toggle
     const themeToggle = document.getElementById('themeToggle');
