@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Comparador de listas</title>
   <style>
-    :root{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0}
-    body{padding:24px;background:#f7f6fb;color:#111}
+    :root{--bg:#f7f6fb;--surface:#fff;--muted:#6b6b6b;--accent:#6b5ce7;--card-shadow:0 10px 30px rgba(12,12,30,0.06);font-family:system-ui,Segoe UI,Roboto,Arial;margin:0}
+    [data-theme="dark"]{--bg:#0f1221;--surface:#0b0c12;--muted:#9aa0b4;--accent:#8f7bf8;--card-shadow:0 12px 36px rgba(0,0,0,0.6)}
+    body{padding:24px;background:var(--bg);color:var(--text,#111)}
     h1{margin:0 0 12px}
     .container{max-width:1100px;margin:0 auto}
     .cols{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:18px;align-items:start}
@@ -14,9 +15,10 @@
     /* add visual separation between inputs */
     .cols > div{padding:8px;background:linear-gradient(180deg, rgba(250,250,255,0.6), rgba(250,250,255,0.3));border-radius:12px;border:1px solid rgba(15,15,20,0.02)}
     .controls{margin:18px 0 6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    button{padding:10px 14px;border-radius:10px;border:none;background:#6b5ce7;color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(107,92,231,0.18);transition:transform .12s ease,box-shadow .12s}
+    button{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;box-shadow:var(--card-shadow);transition:transform .12s ease,box-shadow .12s}
     button:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(107,92,231,0.18)}
-    button.secondary{background:#f1f0f6;color:#222;box-shadow:none}
+    button.secondary{background:transparent;color:var(--muted);box-shadow:none;border:1px solid rgba(15,15,20,0.04);padding:8px 12px}
+    .theme-toggle{margin-left:auto;background:transparent;border:1px solid rgba(15,15,20,0.06);padding:8px 10px;border-radius:8px}
     .results{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .card{background:#ffffff;padding:16px;border-radius:12px;box-shadow:0 10px 30px rgba(12,12,30,0.06);min-height:140px;border:1px solid rgba(15,15,20,0.03)}
     .card h3{margin:0 0 8px;font-size:1rem;color:#111}
@@ -85,23 +87,24 @@ Mandarina</textarea>
     <button id="clear" class="secondary">Limpiar</button>
     <button id="swap" class="secondary">Intercambiar</button>
     <div class="small" style="align-self:center">Atajo: Ctrl/Cmd + Enter para comparar</div>
+    <button id="themeToggle" class="theme-toggle" title="Alternar tema">Tema</button>
   </div>
 
   <div class="results">
     <div class="card">
       <h3 id="h3DiffA">Diferencias (A \ B) <span class="small" id="countDiffA">(0)</span></h3>
       <pre id="diffA">-</pre>
-      <div style="margin-top:8px"><button data-target="diffA" class="copy">Copiar</button></div>
+      <div class="actions"><button data-target="diffA" class="copy">Copiar</button></div>
     </div>
     <div class="card center">
       <h3 id="h3Inter">Intersección <span class="small" id="countInter">(0)</span> <span class="muted" id="pctInter"></span></h3>
       <pre id="inter">-</pre>
-      <div style="margin-top:8px"><button data-target="inter" class="copy">Copiar</button></div>
+      <div class="actions"><button data-target="inter" class="copy">Copiar</button></div>
     </div>
     <div class="card">
       <h3 id="h3DiffB">Diferencias (B \ A) <span class="small" id="countDiffB">(0)</span></h3>
       <pre id="diffB">-</pre>
-      <div style="margin-top:8px"><button data-target="diffB" class="copy">Copiar</button></div>
+      <div class="actions"><button data-target="diffB" class="copy">Copiar</button></div>
     </div>
   </div>
 
@@ -109,17 +112,17 @@ Mandarina</textarea>
     <div class="card">
       <h3 id="h3DupsA">Duplicados A <span class="small" id="countDupsA">(0)</span></h3>
       <pre id="dupsA">-</pre>
-      <div style="margin-top:8px"><button data-target="dupsA" class="copy">Copiar</button> <button id="dedupeA" class="secondary">Eliminar duplicados A</button></div>
+      <div class="actions"><button data-target="dupsA" class="copy">Copiar</button><button id="dedupeA" class="secondary">Eliminar duplicados A</button></div>
     </div>
     <div class="card center">
       <h3 id="h3DupsAll">Duplicados (ambas) <span class="small" id="countDupsAll">(0)</span></h3>
       <pre id="dups">-</pre>
-      <div style="margin-top:8px"><button data-target="dups" class="copy">Copiar</button></div>
+      <div class="actions"><button data-target="dups" class="copy">Copiar</button></div>
     </div>
     <div class="card">
       <h3 id="h3DupsB">Duplicados B <span class="small" id="countDupsB">(0)</span></h3>
       <pre id="dupsB">-</pre>
-      <div style="margin-top:8px"><button data-target="dupsB" class="copy">Copiar</button> <button id="dedupeB" class="secondary">Eliminar duplicados B</button></div>
+      <div class="actions"><button data-target="dupsB" class="copy">Copiar</button><button id="dedupeB" class="secondary">Eliminar duplicados B</button></div>
     </div>
   </div>
 
@@ -199,6 +202,23 @@ Mandarina</textarea>
       const t = document.getElementById(e.currentTarget.dataset.target).textContent;
       try{ await navigator.clipboard.writeText(t); btn.textContent='Copiado'; setTimeout(()=>btn.textContent='Copiar',1200);}catch(err){alert('No se pudo copiar. Usa seleccion y ctrl+c');}
     }));
+
+    // theme handling: detect prefers-color-scheme and allow toggle
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(t){
+      if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+      else document.documentElement.removeAttribute('data-theme');
+    }
+    // initial: from localStorage or prefers
+    const saved = localStorage.getItem('listCompareTheme');
+    if(saved){ applyTheme(saved); }
+    else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ applyTheme('dark'); }
+
+    themeToggle.addEventListener('click', ()=>{
+      const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(now);
+      localStorage.setItem('listCompareTheme', now);
+    });
 
     // keyboard shortcut: Ctrl/Cmd + Enter inside either textarea triggers compare
     const taA = document.getElementById('listA');
