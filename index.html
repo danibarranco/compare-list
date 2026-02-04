@@ -17,6 +17,8 @@
     /* add visual separation between inputs */
     .cols > div{padding:8px;background:linear-gradient(180deg, color-mix(in srgb,var(--surface) 94%, var(--bg) 6%), color-mix(in srgb,var(--surface) 90%, var(--bg) 10%));border-radius:12px;border:1px solid rgba(15,15,20,0.04)}
     .controls{margin:18px 0 6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    /* hide compare button when using realtime mode */
+    .realtime .compare-btn{display:none}
     button{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;box-shadow:var(--card-shadow);transition:transform .12s ease,box-shadow .12s}
     button:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(107,92,231,0.18)}
     button.secondary{background:transparent;color:var(--muted);box-shadow:none;border:1px solid rgba(15,15,20,0.04);padding:8px 12px}
@@ -317,6 +319,15 @@ Mandarina</textarea>
     }
     taA.addEventListener('keydown', handleKey);
     taB.addEventListener('keydown', handleKey);
+
+    // Debounced real-time compare: hide the compare button and run compare on input changes
+    function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), wait); }; }
+    const debouncedCompare = debounce(()=>{ compare(); }, 300);
+    // enable realtime mode (adds class to container to hide compare button)
+    document.querySelector('.container').classList.add('realtime');
+    // attach input listeners to textareas to trigger debounced compare and update totals in real time
+    taA.addEventListener('input', ()=>{ debouncedCompare(); });
+    taB.addEventListener('input', ()=>{ debouncedCompare(); });
 
     // clear individual lists
     document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
