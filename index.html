@@ -5,33 +5,35 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Comparador de listas</title>
   <style>
-    :root{--bg:#f7f6fb;--surface:#fff;--muted:#6b6b6b;--text:#111;--accent:#6b5ce7;--card-shadow:0 10px 30px rgba(12,12,30,0.06);font-family:system-ui,Segoe UI,Roboto,Arial;margin:0}
-    [data-theme="dark"]{--bg:#071026;--surface:#0c1116;--muted:#9aa0b4;--text:#e6eef8;--accent:#8f7bf8;--card-shadow:0 16px 48px rgba(0,0,0,0.6)}
-    body{padding:24px;background:var(--bg);color:var(--text)}
+    :root{--bg:#f7f6fb;--surface:#ffffff;--muted:#6b6b6b;--text:#0f1720;--accent:#7c59f2;--card-shadow:0 8px 24px rgba(12,12,30,0.06);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;margin:0}
+    [data-theme="dark"]{--bg:#071025;--surface:#0b0f14;--muted:#95a0b8;--text:#e6eef8;--accent:#8f7bf8;--card-shadow:0 18px 48px rgba(0,0,0,0.6)}
+    body{padding:24px;background:var(--bg);color:var(--text);transition:background .2s ease,color .2s ease}
     h1{margin:0 0 12px}
     .container{max-width:1100px;margin:0 auto}
     .cols{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:18px;align-items:start}
     .cols > div{box-sizing:border-box}
     textarea{box-sizing:border-box}
-    textarea{width:100%;min-height:240px;padding:16px;border-radius:12px;border:1px solid rgba(15,15,20,0.06);resize:vertical;background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 85%, black 2%));box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);color:var(--text)}
+    textarea{width:100%;min-height:240px;padding:16px;border-radius:10px;border:1px solid color-mix(in srgb,var(--surface) 60%, black 4%);resize:vertical;background:linear-gradient(180deg, color-mix(in srgb,var(--surface) 98%, black 1%), color-mix(in srgb,var(--surface) 95%, black 3%));box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);color:var(--text);font-family:monospace}
     /* add visual separation between inputs */
     .cols > div{padding:8px;background:linear-gradient(180deg, color-mix(in srgb,var(--surface) 94%, var(--bg) 6%), color-mix(in srgb,var(--surface) 90%, var(--bg) 10%));border-radius:12px;border:1px solid rgba(15,15,20,0.04)}
     .controls{margin:18px 0 6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     button{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;box-shadow:var(--card-shadow);transition:transform .12s ease,box-shadow .12s}
     button:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(107,92,231,0.18)}
     button.secondary{background:transparent;color:var(--muted);box-shadow:none;border:1px solid rgba(15,15,20,0.04);padding:8px 12px}
-    .theme-toggle{margin-left:auto;background:transparent;border:1px solid rgba(15,15,20,0.08);padding:8px 10px;border-radius:8px;color:var(--muted);min-width:56px}
+    .theme-toggle{margin-left:auto;background:transparent;border:1px solid rgba(15,15,20,0.06);padding:6px 10px;border-radius:8px;color:var(--muted);min-width:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+    .theme-toggle:hover{background:color-mix(in srgb,var(--surface) 94%, var(--accent) 2%)}
+    .theme-toggle:focus{outline:2px solid color-mix(in srgb,var(--accent) 30%, transparent);outline-offset:3px}
     .results{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .controls{margin-bottom:18px}
-    .card{background:var(--surface);padding:16px;border-radius:12px;box-shadow:var(--card-shadow);min-height:140px;border:1px solid rgba(15,15,20,0.03)}
-    .card h3{margin:0 0 8px;font-size:1rem;color:var(--text)}
+    .card{background:var(--surface);padding:16px;border-radius:12px;box-shadow:var(--card-shadow);min-height:140px;border:1px solid color-mix(in srgb,var(--surface) 60%, black 6%)}
+    .card h3{margin:0 0 8px;font-size:1rem;color:var(--text);font-weight:600}
     /* fixed card height with internal scroll for long content */
     .card{max-height:220px;display:flex;flex-direction:column}
     .card pre{flex:1;overflow:auto;padding-right:6px;color:var(--text)}
     /* ensure textarea fits within its parent and not overflow */
     .cols textarea{width:100%;height:220px}
     /* highlight center column */
-    .card.center{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%, transparent 92%), color-mix(in srgb,var(--accent) 5%, transparent 95%));border:1px solid color-mix(in srgb,var(--accent) 18%, transparent);box-shadow:0 20px 50px color-mix(in srgb,var(--accent) 12%, rgba(0,0,0,0.08));transform:translateY(-2px)}
+    .card.center{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 10%, transparent 90%), color-mix(in srgb,var(--accent) 4%, transparent 96%));border:1px solid color-mix(in srgb,var(--accent) 20%, transparent);box-shadow:0 24px 60px color-mix(in srgb,var(--accent) 12%, rgba(0,0,0,0.12));transform:translateY(-4px)}
     .muted{color:var(--muted)}
     /* ensure cards align with inputs above */
     .results, .cols{max-width:1100px;margin:0 auto}
@@ -219,11 +221,19 @@ Mandarina</textarea>
     if(saved){ applyTheme(saved); }
     else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ applyTheme('dark'); }
 
+    function updateThemeButton(){
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a claro' : 'Cambiar a oscuro');
+    }
     themeToggle.addEventListener('click', ()=>{
       const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       applyTheme(now);
       localStorage.setItem('listCompareTheme', now);
+      updateThemeButton();
     });
+    // initialize theme button state
+    updateThemeButton();
 
     // keyboard shortcut: Ctrl/Cmd + Enter inside either textarea triggers compare
     const taA = document.getElementById('listA');
