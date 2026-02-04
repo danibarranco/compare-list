@@ -63,17 +63,17 @@ Mandarina</textarea>
 
   <div class="results">
     <div class="card">
-      <h3>Diferencias (A \ B)</h3>
+      <h3 id="h3DiffA">Diferencias (A \ B) <span class="small" id="countDiffA">(0)</span></h3>
       <pre id="diffA">-</pre>
       <div style="margin-top:8px"><button data-target="diffA" class="copy">Copiar</button></div>
     </div>
     <div class="card">
-      <h3>Diferencias (B \ A)</h3>
+      <h3 id="h3DiffB">Diferencias (B \ A) <span class="small" id="countDiffB">(0)</span></h3>
       <pre id="diffB">-</pre>
       <div style="margin-top:8px"><button data-target="diffB" class="copy">Copiar</button></div>
     </div>
     <div class="card">
-      <h3>Intersección</h3>
+      <h3 id="h3Inter">Intersección <span class="small" id="countInter">(0)</span></h3>
       <pre id="inter">-</pre>
       <div style="margin-top:8px"><button data-target="inter" class="copy">Copiar</button></div>
     </div>
@@ -81,7 +81,7 @@ Mandarina</textarea>
 
   <div class="results" style="margin-top:12px">
     <div class="card" style="grid-column:span 3">
-      <h3>Duplicados</h3>
+      <h3 id="h3Dups">Duplicados <span class="small" id="countDups">(0)</span></h3>
       <pre id="dups">-</pre>
       <div style="margin-top:8px"><button data-target="dups" class="copy">Copiar</button></div>
     </div>
@@ -131,6 +131,19 @@ Mandarina</textarea>
       document.getElementById('diffB').textContent = diffB.length?diffB.join('\n'):'(ninguno)';
       document.getElementById('inter').textContent = inter.length?inter.join('\n'):'(ninguno)';
       document.getElementById('dups').textContent = dupAll.length?dupAll.join('\n'):'(ninguno)';
+
+      // update counts in headings
+      document.getElementById('countDiffA').textContent = `(${diffA.length})`;
+      document.getElementById('countDiffB').textContent = `(${diffB.length})`;
+      document.getElementById('countInter').textContent = `(${inter.length})`;
+      document.getElementById('dups').dataset.count = dupAll.length; // keep raw number if needed
+      const dupCountEl = document.getElementById('dups');
+      // show count on heading for duplicates (we'll find the h3 sibling)
+      const dupHeading = document.querySelector('.card h3#h3Dups');
+      if(dupHeading){
+        const dupCountSpan = document.getElementById('countDups');
+        if(dupCountSpan) dupCountSpan.textContent = `(${dupAll.length})`;
+      }
     }
 
     document.getElementById('compare').addEventListener('click', compare);
