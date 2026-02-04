@@ -65,6 +65,7 @@
           <span class="small">Total: <span id="totalA">0</span></span>
           <button id="clearA" class="secondary" title="Limpiar lista A">Limpiar A</button>
           <button id="sortA" class="secondary" title="Ordenar lista A">Ordenar A</button>
+          <button id="dedupeA_top" class="secondary" title="Eliminar duplicados A">Eliminar duplicados A</button>
         </div>
       </div>
       <textarea id="listA" placeholder="Elemento 1\nElemento 2\n...">Manzana
@@ -81,6 +82,7 @@ Manzana</textarea>
           <span class="small">Total: <span id="totalB">0</span></span>
           <button id="clearB" class="secondary" title="Limpiar lista B">Limpiar B</button>
           <button id="sortB" class="secondary" title="Ordenar lista B">Ordenar B</button>
+          <button id="dedupeB_top" class="secondary" title="Eliminar duplicados B">Eliminar duplicados B</button>
         </div>
       </div>
       <textarea id="listB" placeholder="Elemento 1\nElemento 2\n...">pera
@@ -125,7 +127,7 @@ Mandarina</textarea>
     <div class="card">
       <h3 id="h3DupsA">Duplicados A <span class="small" id="countDupsA">(0)</span></h3>
       <pre id="dupsA">-</pre>
-      <div class="actions"><button data-target="dupsA" class="copy">Copiar</button><button id="dedupeA" class="secondary">Eliminar duplicados A</button></div>
+      <div class="actions"><button data-target="dupsA" class="copy">Copiar</button></div>
     </div>
     <div class="card center">
       <h3 id="h3DupsAll">Duplicados (ambas) <span class="small" id="countDupsAll">(0)</span></h3>
@@ -135,7 +137,7 @@ Mandarina</textarea>
     <div class="card">
       <h3 id="h3DupsB">Duplicados B <span class="small" id="countDupsB">(0)</span></h3>
       <pre id="dupsB">-</pre>
-      <div class="actions"><button data-target="dupsB" class="copy">Copiar</button><button id="dedupeB" class="secondary">Eliminar duplicados B</button></div>
+      <div class="actions"><button data-target="dupsB" class="copy">Copiar</button></div>
     </div>
   </div>
 
@@ -258,15 +260,14 @@ Mandarina</textarea>
     function updateCardNote(targetId, ts){
       const el = document.querySelector(`[data-target="${targetId}"]`);
       if(!el) return;
-      // find card container (closest .card)
-      const card = el.closest('.card');
-      if(!card) return;
-      let note = card.querySelector('.copied-note');
-      if(!note){ note = document.createElement('div'); note.className='copied-note'; card.appendChild(note); }
+      // find actions container
+      const actions = el.closest('.actions');
+      if(!actions) return;
+      let note = actions.querySelector('.copied-note');
+      if(!note){ note = document.createElement('div'); note.className='copied-note'; note.style.marginLeft='10px'; actions.appendChild(note); }
       const d = new Date(ts);
-      // small human readable
       const hh = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      note.textContent = `Último copiado: ${hh}`;
+      note.textContent = `Último: ${hh}`;
     }
 
     // theme handling: detect prefers-color-scheme and allow toggle
@@ -310,15 +311,15 @@ Mandarina</textarea>
     document.getElementById('clearA').addEventListener('click', ()=>{document.getElementById('listA').value=''; compare();});
     document.getElementById('clearB').addEventListener('click', ()=>{document.getElementById('listB').value=''; compare();});
 
-    // remove duplicates from a list (keep first occurrence)
-    document.getElementById('dedupeA').addEventListener('click', ()=>{
+    // remove duplicates from a list (keep first occurrence) — moved to top controls
+    document.getElementById('dedupeA_top').addEventListener('click', ()=>{
       const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
       const a = parse(document.getElementById('listA').value, opts);
       const unique = uniq(a);
       document.getElementById('listA').value = unique.join('\n');
       compare();
     });
-    document.getElementById('dedupeB').addEventListener('click', ()=>{
+    document.getElementById('dedupeB_top').addEventListener('click', ()=>{
       const opts = {trim:document.getElementById('trim').checked, lower:document.getElementById('lower').checked, ignoreEmpty:document.getElementById('ignoreEmpty').checked};
       const b = parse(document.getElementById('listB').value, opts);
       const unique = uniq(b);
