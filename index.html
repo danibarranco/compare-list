@@ -207,7 +207,17 @@ Mandarina</textarea>
 
     document.querySelectorAll('.copy').forEach(btn=>btn.addEventListener('click', async e=>{
       const t = document.getElementById(e.currentTarget.dataset.target).textContent;
-      try{ await navigator.clipboard.writeText(t); btn.textContent='Copiado'; setTimeout(()=>btn.textContent='Copiar',1200);}catch(err){alert('No se pudo copiar. Usa seleccion y ctrl+c');}
+      const el = e.currentTarget;
+      try{ 
+        await navigator.clipboard.writeText(t);
+        // visual state: set copied class and text
+        el.classList.add('copied');
+        const prev = el.textContent;
+        el.textContent = 'Copiado';
+        // keep green state briefly then revert
+        clearTimeout(el._copiedTimer);
+        el._copiedTimer = setTimeout(()=>{ el.classList.remove('copied'); el.textContent = prev; }, 2000);
+      }catch(err){alert('No se pudo copiar. Usa selección y ctrl+c');}
     }));
 
     // theme handling: detect prefers-color-scheme and allow toggle
