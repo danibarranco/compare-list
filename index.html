@@ -53,6 +53,7 @@ Mandarina</textarea>
     <button id="compare">Comparar</button>
     <button id="clear" class="secondary">Limpiar</button>
     <button id="swap" class="secondary">Intercambiar</button>
+    <div class="small" style="align-self:center">Atajo: Ctrl/Cmd + Enter para comparar</div>
   </div>
 
   <div class="results">
@@ -135,6 +136,18 @@ Mandarina</textarea>
       const t = document.getElementById(e.currentTarget.dataset.target).textContent;
       try{ await navigator.clipboard.writeText(t); btn.textContent='Copiado'; setTimeout(()=>btn.textContent='Copiar',1200);}catch(err){alert('No se pudo copiar. Usa seleccion y ctrl+c');}
     }));
+
+    // keyboard shortcut: Ctrl/Cmd + Enter inside either textarea triggers compare
+    const taA = document.getElementById('listA');
+    const taB = document.getElementById('listB');
+    function handleKey(e){
+      if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+        e.preventDefault();
+        compare();
+      }
+    }
+    taA.addEventListener('keydown', handleKey);
+    taB.addEventListener('keydown', handleKey);
 
     // initial compare
     compare();
