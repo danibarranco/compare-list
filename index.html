@@ -223,10 +223,13 @@ Mandarina</textarea>
         const now = Date.now();
         localStorage.setItem('listCompare.lastCopied', targetId);
         localStorage.setItem(`listCompare.lastCopiedAt:${targetId}`, String(now));
-        // visual state: set copied class and show check
-        document.querySelectorAll('.copy').forEach(b=>{ b.classList.remove('copied'); if(!b.dataset.target) b.innerText='Copiar'; });
+        // visual state: set copied class and show check on this button, clear others
+        document.querySelectorAll('.copy').forEach(b=>{ b.classList.remove('copied'); if(b !== el) b.innerText='Copiar'; clearTimeout(b._revertTimer); });
         el.classList.add('copied');
         el.innerText = '✓ Copiado';
+        // schedule revert of button back to 'Copiar' after 10s, but keep the note persisted
+        clearTimeout(el._revertTimer);
+        el._revertTimer = setTimeout(()=>{ el.classList.remove('copied'); el.innerText='Copiar'; }, 10000);
         // update small note inside the card
         updateCardNote(targetId, now);
         // show toast
@@ -236,9 +239,17 @@ Mandarina</textarea>
     // restore copied state on load if any
     (function restoreCopied(){
       const last = localStorage.getItem('listCompare.lastCopied');
+      const TEN = 10000; // ms to keep button in 'copied' state
       if(last){
         const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===last);
-        if(btn){ btn.classList.add('copied'); btn.innerText = '✓ Copiado'; }
+        const at = localStorage.getItem(`listCompare.lastCopiedAt:${last}`);
+        const age = at ? (Date.now() - Number(at)) : Infinity;
+        // only show the button as 'copied' if within TEN ms; otherwise only show the note
+        if(btn && age < TEN){ btn.classList.add('copied'); btn.innerText = '✓ Copiado';
+          // schedule revert
+          clearTimeout(btn._revertTimer);
+          btn._revertTimer = setTimeout(()=>{ btn.classList.remove('copied'); btn.innerText='Copiar'; }, TEN - age);
+        }
       }
       // restore timestamps per card notes
       Array.from(document.querySelectorAll('.copy')).forEach(b=>{
