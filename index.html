@@ -42,6 +42,10 @@
     pre{white-space:pre-wrap;margin:0;font-family:inherit;color:var(--text)}
     .footer{margin-top:22px;color:var(--muted);font-size:0.95rem}
     .small{font-size:0.9rem;color:var(--muted)}
+    /* toast */
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 92%, var(--accent) 2%),var(--surface));padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--surface) 60%, black 6%);box-shadow:0 12px 30px rgba(11,13,20,0.35);color:var(--text);display:none;z-index:999}
+    [data-theme="dark"] .toast{box-shadow:none;border-color:color-mix(in srgb,var(--surface) 50%, black 18%)}
+    .card .copied-note{font-size:0.8rem;color:color-mix(in srgb,var(--muted) 80%, var(--text) 20%);margin-top:8px}
     @media (max-width:700px){
       .cols{grid-template-columns:1fr;gap:12px}
       .results{grid-template-columns:1fr}
@@ -213,23 +217,57 @@ Mandarina</textarea>
       const el = e.currentTarget;
       try{
         await navigator.clipboard.writeText(t);
-        // persist which panel was copied
+        // persist which panel was copied and timestamp
+        const now = Date.now();
         localStorage.setItem('listCompare.lastCopied', targetId);
+        localStorage.setItem(`listCompare.lastCopiedAt:${targetId}`, String(now));
         // visual state: set copied class and show check
+        document.querySelectorAll('.copy').forEach(b=>{ b.classList.remove('copied'); if(!b.dataset.target) b.innerText='Copiar'; });
         el.classList.add('copied');
         el.innerText = '✓ Copiado';
-        // clear any timer
-        clearTimeout(el._copiedTimer);
-        // leave state persistent (don't auto-revert) — other copies will override
+        // update small note inside the card
+        updateCardNote(targetId, now);
+        // show toast
+        showToast('Texto copiado al portapapeles');
       }catch(err){alert('No se pudo copiar. Usa selección y ctrl+c');}
     }));
     // restore copied state on load if any
     (function restoreCopied(){
       const last = localStorage.getItem('listCompare.lastCopied');
-      if(!last) return;
-      const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===last);
-      if(btn){ btn.classList.add('copied'); btn.innerText = '✓ Copiado'; }
+      if(last){
+        const btn = Array.from(document.querySelectorAll('.copy')).find(b=>b.dataset.target===last);
+        if(btn){ btn.classList.add('copied'); btn.innerText = '✓ Copiado'; }
+      }
+      // restore timestamps per card notes
+      Array.from(document.querySelectorAll('.copy')).forEach(b=>{
+        const target = b.dataset.target;
+        const at = localStorage.getItem(`listCompare.lastCopiedAt:${target}`);
+        if(at) updateCardNote(target, Number(at));
+      });
     })();
+
+    // basic toast helper
+    function showToast(text, ms=2200){
+      let t = document.getElementById('toast');
+      if(!t){ t = document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+      t.textContent = text;
+      t.style.display = 'block';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(()=>{ t.style.display='none'; }, ms);
+    }
+    function updateCardNote(targetId, ts){
+      const el = document.querySelector(`[data-target="${targetId}"]`);
+      if(!el) return;
+      // find card container (closest .card)
+      const card = el.closest('.card');
+      if(!card) return;
+      let note = card.querySelector('.copied-note');
+      if(!note){ note = document.createElement('div'); note.className='copied-note'; card.appendChild(note); }
+      const d = new Date(ts);
+      // small human readable
+      const hh = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      note.textContent = `Último copiado: ${hh}`;
+    }
 
     // theme handling: detect prefers-color-scheme and allow toggle
     const themeToggle = document.getElementById('themeToggle');
