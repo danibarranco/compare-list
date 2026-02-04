@@ -94,8 +94,18 @@ Mandarina</textarea>
   </div>
 
   <div class="results" style="margin-top:12px">
-    <div class="card" style="grid-column:span 3">
-      <h3 id="h3Dups">Duplicados <span class="small" id="countDups">(0)</span></h3>
+    <div class="card">
+      <h3 id="h3DupsA">Duplicados A <span class="small" id="countDupsA">(0)</span></h3>
+      <pre id="dupsA">-</pre>
+      <div style="margin-top:8px"><button data-target="dupsA" class="copy">Copiar</button></div>
+    </div>
+    <div class="card">
+      <h3 id="h3DupsB">Duplicados B <span class="small" id="countDupsB">(0)</span></h3>
+      <pre id="dupsB">-</pre>
+      <div style="margin-top:8px"><button data-target="dupsB" class="copy">Copiar</button></div>
+    </div>
+    <div class="card">
+      <h3 id="h3DupsAll">Duplicados (ambas) <span class="small" id="countDupsAll">(0)</span></h3>
       <pre id="dups">-</pre>
       <div style="margin-top:8px"><button data-target="dups" class="copy">Copiar</button></div>
     </div>
@@ -150,13 +160,17 @@ Mandarina</textarea>
       document.getElementById('diffA').textContent = diffA.length?diffA.join('\n'):'(ninguno)';
       document.getElementById('diffB').textContent = diffB.length?diffB.join('\n'):'(ninguno)';
       document.getElementById('inter').textContent = inter.length?inter.join('\n'):'(ninguno)';
+      document.getElementById('dupsA').textContent = dupA.length?dupA.join('\n'):'(ninguno)';
+      document.getElementById('dupsB').textContent = dupB.length?dupB.join('\n'):'(ninguno)';
       document.getElementById('dups').textContent = dupAll.length?dupAll.join('\n'):'(ninguno)';
 
       // update counts in headings
       document.getElementById('countDiffA').textContent = `(${diffA.length})`;
       document.getElementById('countDiffB').textContent = `(${diffB.length})`;
       document.getElementById('countInter').textContent = `(${inter.length})`;
-      document.getElementById('countDups').textContent = `(${dupAll.length})`;
+      document.getElementById('countDupsA').textContent = `(${dupA.length})`;
+      document.getElementById('countDupsB').textContent = `(${dupB.length})`;
+      document.getElementById('countDupsAll').textContent = `(${dupAll.length})`;
     }
 
     document.getElementById('compare').addEventListener('click', compare);
