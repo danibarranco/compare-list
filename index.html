@@ -64,11 +64,16 @@
       .cols{grid-template-columns:1fr;gap:12px}
       .results{grid-template-columns:1fr}
     }
+    /* Easter egg styles */
+    #egg-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1200}
+    #egg-modal{background:var(--surface);padding:20px;border-radius:12px;box-shadow:0 30px 80px rgba(15,15,30,0.4);max-width:480px;width:92%;text-align:center}
+    #roulette{border-radius:50%}
+    #roulette-result{font-weight:600}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Comparador de listas</h1>
+    <h1 id="title">Comparador de listas</h1>
     <p class="small">Pega una lista por línea en cada campo. Usa las opciones para normalizar elementos (trim, lowercase). La herramienta muestra diferencias, intersecciones y duplicados al instante. No requiere registro.</p>
     <!-- Structured data: FAQ + SoftwareApplication -->
     <script type="application/ld+json">
@@ -83,6 +88,19 @@
       ]
     }
     </script>
+
+    <!-- Hidden Easter egg: roulette modal (double-click title to open) -->
+    <div id="egg-overlay" aria-hidden="true" style="display:none;">
+      <div id="egg-modal" role="dialog" aria-modal="true" aria-labelledby="egg-title">
+        <h2 id="egg-title" style="margin:0 0 12px">Ruleta secreta</h2>
+        <canvas id="roulette" width="420" height="420" style="display:block;margin:0 auto;background:transparent"></canvas>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+          <button id="spin">Girar</button>
+          <button id="closeEgg" class="secondary">Cerrar</button>
+        </div>
+        <div id="roulette-result" aria-live="polite" style="text-align:center;margin-top:10px;color:var(--muted)"></div>
+      </div>
+    </div>
 
     <div class="cols">
     <div>
@@ -324,6 +342,70 @@ Mandarina</textarea>
       else txt = `hace ${Math.floor(age/3600)}h`;
       note.textContent = txt;
     }
+
+    // EASTER EGG: hidden roulette game
+    (function(){
+      const title = document.getElementById('title');
+      const overlay = document.getElementById('egg-overlay');
+      const modal = document.getElementById('egg-modal');
+      const canvas = document.getElementById('roulette');
+      const spinBtn = document.getElementById('spin');
+      const closeBtn = document.getElementById('closeEgg');
+      const resultEl = document.getElementById('roulette-result');
+      if(!title || !overlay || !canvas) return;
+      const sectors = ['🎉 Premio', '🍪 Galleta', '✨ Nada', '🎁 Bonus', '🔁 Reintentar', '⭐️ Suerte'];
+      const colors = ['#7c59f2','#6bdeff','#ffd166','#c6f6d5','#ffb5e8','#e0e7ff'];
+      const ctx = canvas.getContext('2d');
+      const cx = canvas.width/2, cy = canvas.height/2, radius = Math.min(cx,cy)-6;
+      function drawWheel(){
+        const seg = 2*Math.PI / sectors.length;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(let i=0;i<sectors.length;i++){
+          const start = i*seg; const end = start+seg;
+          ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,radius,start,end); ctx.closePath();
+          ctx.fillStyle = colors[i%colors.length]; ctx.fill();
+          // labels
+          ctx.save(); ctx.translate(cx,cy); ctx.rotate(start + seg/2); ctx.textAlign='right'; ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.font='16px monospace';
+          ctx.fillText(sectors[i], radius-10, 6);
+          ctx.restore();
+        }
+        // pointer
+        ctx.fillStyle = 'var(--accent)'; ctx.beginPath(); ctx.moveTo(cx+4,cy-radius-8); ctx.lineTo(cx-4,cy-radius-8); ctx.lineTo(cx,cy-radius+8); ctx.fill();
+      }
+      let spinning=false;
+      function spin(){
+        if(spinning) return; spinning=true; resultEl.textContent='';
+        const total = 360 * 6 + (Math.random()*360);
+        const duration = 4000 + Math.random()*2000;
+        const start = performance.now();
+        const initial = 0;
+        function frame(now){
+          const t = Math.min(1,(now-start)/duration);
+          // ease out cubic
+          const ease = 1 - Math.pow(1-t,3);
+          const angle = (initial + total*ease) % 360;
+          canvas.style.transform = `rotate(${angle}deg)`;
+          if(t<1) requestAnimationFrame(frame);
+          else{
+            spinning=false;
+            // determine sector
+            const finalAngle = (angle%360); // degrees
+            const degPer = 360/sectors.length;
+            const index = Math.floor(((360 - finalAngle + degPer/2) % 360)/degPer) % sectors.length;
+            resultEl.textContent = sectors[index];
+          }
+        }
+        requestAnimationFrame(frame);
+      }
+      // draw static wheel on canvas (unrotated) — but we will rotate via CSS transform
+      drawWheel();
+      // handlers
+      title.addEventListener('dblclick', ()=>{ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); });
+      closeBtn.addEventListener('click', ()=>{ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); });
+      spinBtn.addEventListener('click', spin);
+      // allow Esc to close
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); } });
+    })();
 
     // theme handling: detect prefers-color-scheme and allow toggle
     const themeToggle = document.getElementById('themeToggle');
