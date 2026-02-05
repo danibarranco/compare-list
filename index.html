@@ -184,6 +184,49 @@ Mandarina</textarea>
     </div>
   </div>
 
+    <!-- Betting panel -->
+    <div class="card" style="margin-top:14px">
+      <h3>Panel de apuestas</h3>
+      <div id="betting" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div style="min-width:260px">
+          <div class="small">Saldo: <strong id="balance">1000</strong> fichas</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <div>
+              <button class="chip" data-value="1">1</button>
+              <button class="chip" data-value="5">5</button>
+              <button class="chip" data-value="25">25</button>
+              <button class="chip" data-value="100">100</button>
+            </div>
+            <div style="margin-left:8px">
+              <input id="chipCustom" type="number" min="1" placeholder="Otra" style="width:80px;padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.08)" />
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <label class="small">Tipo de apuesta</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+              <button class="bet-type" data-type="color">Rojo/Negro</button>
+              <button class="bet-type" data-type="par">Par/Impar</button>
+              <button class="bet-type" data-type="half">Alta/Baja</button>
+              <button class="bet-type" data-type="dozen">Docena</button>
+              <button class="bet-type" data-type="column">Columna</button>
+              <button class="bet-type" data-type="number">Pleno</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:260px">
+          <div class="small">Apuestas activas</div>
+          <div id="betsList" style="margin-top:8px;max-height:140px;overflow:auto;border:1px dashed rgba(0,0,0,0.05);padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fafafa)">(ninguna)</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <div class="small">Total apostado: <strong id="totalBet">0</strong></div>
+            <button id="clearBets" class="secondary">Limpiar apuestas</button>
+            <button id="playSpin" style="margin-left:auto">GIRAR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="footer"></div>
   </div>
 
