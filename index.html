@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Comparador de listas online — eliminar duplicados y encontrar diferencias</title>
-  <meta name="description" content="Comparador de listas gratuito. Pega dos listas, elimina duplicados, encuentra intersecciones y exporta. Rápido, privado y sin instalación.">
+  <title>Comparador de listas y JSON Formatter online — herramientas de texto gratuitas</title>
+  <meta name="description" content="Comparador de listas y formateador JSON gratuito. Compara listas, valida, formatea y compara JSON. Rápido, privado y sin instalación.">
   <link rel="canonical" href="https://yourdomain.com/compare-list">
-  <meta property="og:title" content="Comparador de listas online — eliminar duplicados y encontrar diferencias">
-  <meta property="og:description" content="Pega dos listas y obtén diferencias, intersecciones y duplicados al instante. Exporta CSV/JSON. Rápido, privado y sin instalaciones.">
+  <meta property="og:title" content="Comparador de listas y JSON Formatter online — herramientas de texto gratuitas">
+  <meta property="og:description" content="Compara listas, valida y formatea JSON al instante. Encuentra diferencias, duplicados y errores. Rápido, privado y sin instalaciones.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <script>
@@ -69,12 +69,41 @@
     #egg-modal{background:var(--surface);padding:20px;border-radius:12px;box-shadow:0 30px 80px rgba(15,15,30,0.4);max-width:480px;width:92%;text-align:center}
     #roulette{border-radius:50%}
     #roulette-result{font-weight:600}
+    /* Tab navigation */
+    .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid color-mix(in srgb,var(--surface) 60%, black 6%);padding-bottom:0}
+    .tab-btn{padding:10px 20px;border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:none;background:transparent;color:var(--muted);box-shadow:none;cursor:pointer;font-weight:500;font-size:0.95rem;transition:background .15s,color .15s}
+    .tab-btn:hover{background:color-mix(in srgb,var(--surface) 94%, var(--accent) 4%);color:var(--text);transform:none;box-shadow:none}
+    .tab-btn.active{background:var(--surface);color:var(--accent);border-color:color-mix(in srgb,var(--surface) 60%, black 6%);box-shadow:0 2px 0 var(--surface);margin-bottom:-2px;transform:none}
+    [data-theme="dark"] .tab-btn.active{box-shadow:0 2px 0 var(--bg)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    /* JSON tool styles */
+    .json-status{font-size:0.85rem;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:6px;font-weight:500}
+    .json-status.valid{background:color-mix(in srgb,#22c55e 12%, transparent);color:#16a34a}
+    .json-status.invalid{background:color-mix(in srgb,#ef4444 12%, transparent);color:#dc2626}
+    .json-status.empty{background:transparent;color:var(--muted)}
+    [data-theme="dark"] .json-status.valid{color:#4ade80}
+    [data-theme="dark"] .json-status.invalid{color:#f87171}
+    #tab-json .card{max-height:320px}
+    #tab-json .card pre{font-family:monospace;font-size:0.85rem}
+    .json-diff-path{color:var(--accent);font-weight:600}
+    .json-diff-added{color:#16a34a}
+    .json-diff-removed{color:#dc2626}
+    .json-diff-changed{color:#d97706}
+    [data-theme="dark"] .json-diff-added{color:#4ade80}
+    [data-theme="dark"] .json-diff-removed{color:#f87171}
+    [data-theme="dark"] .json-diff-changed{color:#fbbf24}
+    select{padding:8px 12px;border-radius:8px;border:1px solid rgba(15,15,20,0.08);background:var(--surface);color:var(--text);font-size:0.9rem}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 id="title">Comparador de listas</h1>
-    <p class="small">Pega una lista por línea en cada campo. Usa las opciones para normalizar elementos (trim, lowercase). La herramienta muestra diferencias, intersecciones y duplicados al instante. No requiere registro.</p>
+    <h1 id="title">Herramientas online</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-lists">Comparador de listas</button>
+      <button class="tab-btn" data-tab="tab-json">JSON Formatter</button>
+      <button id="themeToggle" class="theme-toggle" title="Alternar tema">Tema</button>
+    </div>
     <!-- Structured data: FAQ + SoftwareApplication -->
     <script type="application/ld+json">
     {
@@ -102,6 +131,8 @@
       </div>
     </div>
 
+    <div id="tab-lists" class="tab-content active">
+    <p class="small">Pega una lista por línea en cada campo. Usa las opciones para normalizar elementos (trim, lowercase). La herramienta muestra diferencias, intersecciones y duplicados al instante. No requiere registro.</p>
     <div class="cols">
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
@@ -145,7 +176,6 @@ Mandarina</textarea>
     <label class="small"><input type="checkbox" id="ignoreEmpty" checked> Ignorar líneas vacías</label>
     <button id="clear" class="secondary">Limpiar</button>
     <button id="swap" class="secondary">Intercambiar</button>
-    <button id="themeToggle" class="theme-toggle" title="Alternar tema">Tema</button>
   </div>
 
   <div class="results">
@@ -226,6 +256,91 @@ Mandarina</textarea>
         </div>
       </div>
     </div>
+    </div><!-- end #tab-lists -->
+
+    <!-- JSON Formatter Tab -->
+    <div id="tab-json" class="tab-content">
+      <p class="small">Pega JSON en los campos para validar, formatear y comparar. Todo se ejecuta en tu navegador, sin enviar datos a ningún servidor.</p>
+      <div class="cols">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label><strong>JSON A</strong></label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="formatA" class="secondary">Formatear</button>
+              <button id="minifyA" class="secondary">Minificar</button>
+              <button id="clearJsonA" class="secondary">Limpiar</button>
+              <button id="copyJsonA" class="secondary">Copiar</button>
+            </div>
+          </div>
+          <textarea id="jsonA" placeholder='{"clave": "valor"}'>{
+  "nombre": "Juan",
+  "edad": 30,
+  "ciudad": "Madrid",
+  "hobbies": ["leer", "correr"],
+  "activo": true
+}</textarea>
+          <div id="statusA" class="json-status empty">Escribe un JSON para validar</div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label><strong>JSON B</strong></label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="formatB" class="secondary">Formatear</button>
+              <button id="minifyB" class="secondary">Minificar</button>
+              <button id="clearJsonB" class="secondary">Limpiar</button>
+              <button id="copyJsonB" class="secondary">Copiar</button>
+            </div>
+          </div>
+          <textarea id="jsonB" placeholder='{"clave": "valor"}'>{
+  "nombre": "Juan",
+  "edad": 31,
+  "ciudad": "Barcelona",
+  "hobbies": ["leer", "nadar"],
+  "trabajo": "ingeniero"
+}</textarea>
+          <div id="statusB" class="json-status empty">Escribe un JSON para validar</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label class="small">Indentación:
+          <select id="jsonIndent">
+            <option value="2" selected>2 espacios</option>
+            <option value="4">4 espacios</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+        <button id="compareJson">Comparar JSONs</button>
+        <button id="swapJson" class="secondary">Intercambiar</button>
+        <button id="clearAllJson" class="secondary">Limpiar todo</button>
+      </div>
+
+      <div class="results" id="jsonResults">
+        <div class="card">
+          <h3>Solo en A <span class="small" id="countJsonOnlyA">(0)</span></h3>
+          <pre id="jsonOnlyA">(ninguno)</pre>
+          <div class="actions"><button data-target="jsonOnlyA" class="copy-json">Copiar</button></div>
+        </div>
+        <div class="card center">
+          <h3>Diferencias de valor <span class="small" id="countJsonChanged">(0)</span></h3>
+          <pre id="jsonChanged">(ninguno)</pre>
+          <div class="actions"><button data-target="jsonChanged" class="copy-json">Copiar</button></div>
+        </div>
+        <div class="card">
+          <h3>Solo en B <span class="small" id="countJsonOnlyB">(0)</span></h3>
+          <pre id="jsonOnlyB">(ninguno)</pre>
+          <div class="actions"><button data-target="jsonOnlyB" class="copy-json">Copiar</button></div>
+        </div>
+      </div>
+
+      <div class="results" style="margin-top:12px">
+        <div class="card center" style="grid-column:1/-1;max-height:none">
+          <h3>Coincidencias <span class="small" id="countJsonSame">(0)</span></h3>
+          <pre id="jsonSame" style="max-height:200px;overflow:auto">(ninguno)</pre>
+          <div class="actions"><button data-target="jsonSame" class="copy-json">Copiar</button></div>
+        </div>
+      </div>
+    </div><!-- end #tab-json -->
 
     <div class="footer"></div>
   </div>
@@ -606,6 +721,220 @@ Mandarina</textarea>
 
     // initial compare
     compare();
+
+    // ========== TAB SWITCHING ==========
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    // ========== JSON TOOLS ==========
+    (function(){
+      const jsonA = document.getElementById('jsonA');
+      const jsonB = document.getElementById('jsonB');
+      const statusA = document.getElementById('statusA');
+      const statusB = document.getElementById('statusB');
+
+      // Validation
+      function validateJson(textarea, statusEl){
+        const val = textarea.value.trim();
+        if(!val){
+          statusEl.className = 'json-status empty';
+          statusEl.textContent = 'Escribe un JSON para validar';
+          return null;
+        }
+        try{
+          const parsed = JSON.parse(val);
+          statusEl.className = 'json-status valid';
+          const type = Array.isArray(parsed) ? 'array' : typeof parsed;
+          const keys = (typeof parsed === 'object' && parsed !== null) ? Object.keys(parsed).length : 0;
+          statusEl.textContent = `JSON valido (${type}${type==='object'?' — '+keys+' claves':type==='array'?' — '+parsed.length+' elementos':''})`;
+          return parsed;
+        }catch(e){
+          statusEl.className = 'json-status invalid';
+          // Extract position info from error message
+          const match = e.message.match(/position\s+(\d+)/i);
+          if(match){
+            const pos = parseInt(match[1]);
+            const before = val.substring(0, pos);
+            const line = (before.match(/\n/g)||[]).length + 1;
+            const col = pos - before.lastIndexOf('\n');
+            statusEl.textContent = `Error: ${e.message} (linea ${line}, col ${col})`;
+          } else {
+            statusEl.textContent = `Error: ${e.message}`;
+          }
+          return null;
+        }
+      }
+
+      // Get indent value
+      function getIndent(){
+        const v = document.getElementById('jsonIndent').value;
+        return v === 'tab' ? '\t' : parseInt(v);
+      }
+
+      // Format
+      function formatJson(textarea, statusEl){
+        const parsed = validateJson(textarea, statusEl);
+        if(parsed !== null){
+          textarea.value = JSON.stringify(parsed, null, getIndent());
+          validateJson(textarea, statusEl);
+        }
+      }
+
+      // Minify
+      function minifyJson(textarea, statusEl){
+        const parsed = validateJson(textarea, statusEl);
+        if(parsed !== null){
+          textarea.value = JSON.stringify(parsed);
+          validateJson(textarea, statusEl);
+        }
+      }
+
+      // Debounced validation
+      const debouncedValidateA = debounce(()=>validateJson(jsonA, statusA), 300);
+      const debouncedValidateB = debounce(()=>validateJson(jsonB, statusB), 300);
+
+      jsonA.addEventListener('input', debouncedValidateA);
+      jsonB.addEventListener('input', debouncedValidateB);
+      jsonA.addEventListener('paste', ()=>setTimeout(()=>validateJson(jsonA, statusA), 50));
+      jsonB.addEventListener('paste', ()=>setTimeout(()=>validateJson(jsonB, statusB), 50));
+
+      // Buttons
+      document.getElementById('formatA').addEventListener('click', ()=>formatJson(jsonA, statusA));
+      document.getElementById('formatB').addEventListener('click', ()=>formatJson(jsonB, statusB));
+      document.getElementById('minifyA').addEventListener('click', ()=>minifyJson(jsonA, statusA));
+      document.getElementById('minifyB').addEventListener('click', ()=>minifyJson(jsonB, statusB));
+      document.getElementById('clearJsonA').addEventListener('click', ()=>{jsonA.value='';validateJson(jsonA, statusA);clearJsonResults();});
+      document.getElementById('clearJsonB').addEventListener('click', ()=>{jsonB.value='';validateJson(jsonB, statusB);clearJsonResults();});
+      document.getElementById('clearAllJson').addEventListener('click', ()=>{jsonA.value='';jsonB.value='';validateJson(jsonA, statusA);validateJson(jsonB, statusB);clearJsonResults();});
+      document.getElementById('swapJson').addEventListener('click', ()=>{
+        const tmp = jsonA.value; jsonA.value = jsonB.value; jsonB.value = tmp;
+        validateJson(jsonA, statusA); validateJson(jsonB, statusB);
+      });
+
+      // Copy buttons
+      document.getElementById('copyJsonA').addEventListener('click', async ()=>{
+        try{ await navigator.clipboard.writeText(jsonA.value); showToast('JSON A copiado'); }catch(e){ alert('No se pudo copiar'); }
+      });
+      document.getElementById('copyJsonB').addEventListener('click', async ()=>{
+        try{ await navigator.clipboard.writeText(jsonB.value); showToast('JSON B copiado'); }catch(e){ alert('No se pudo copiar'); }
+      });
+
+      // Copy result cards
+      document.querySelectorAll('.copy-json').forEach(btn=>btn.addEventListener('click', async e=>{
+        const targetId = e.currentTarget.dataset.target;
+        const t = document.getElementById(targetId).textContent;
+        try{
+          await navigator.clipboard.writeText(t);
+          e.currentTarget.innerText = '✓ Copiado';
+          setTimeout(()=>{ e.currentTarget.innerText = 'Copiar'; }, 2000);
+          showToast('Texto copiado al portapapeles');
+        }catch(err){ alert('No se pudo copiar'); }
+      }));
+
+      // JSON diff
+      function diffObjects(a, b, path=''){
+        const onlyA = [], onlyB = [], changed = [], same = [];
+        const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
+        for(const key of allKeys){
+          const p = path ? `${path}.${key}` : key;
+          const inA = key in a, inB = key in b;
+          if(inA && !inB){
+            onlyA.push(`${p}: ${JSON.stringify(a[key])}`);
+          } else if(!inA && inB){
+            onlyB.push(`${p}: ${JSON.stringify(b[key])}`);
+          } else {
+            // both exist
+            const va = a[key], vb = b[key];
+            if(typeof va === 'object' && va !== null && typeof vb === 'object' && vb !== null && !Array.isArray(va) && !Array.isArray(vb)){
+              // recurse into nested objects
+              const sub = diffObjects(va, vb, p);
+              onlyA.push(...sub.onlyA);
+              onlyB.push(...sub.onlyB);
+              changed.push(...sub.changed);
+              same.push(...sub.same);
+            } else if(JSON.stringify(va) === JSON.stringify(vb)){
+              same.push(`${p}: ${JSON.stringify(va)}`);
+            } else {
+              changed.push(`${p}: ${JSON.stringify(va)} → ${JSON.stringify(vb)}`);
+            }
+          }
+        }
+        return { onlyA, onlyB, changed, same };
+      }
+
+      function clearJsonResults(){
+        document.getElementById('jsonOnlyA').textContent = '(ninguno)';
+        document.getElementById('jsonOnlyB').textContent = '(ninguno)';
+        document.getElementById('jsonChanged').textContent = '(ninguno)';
+        document.getElementById('jsonSame').textContent = '(ninguno)';
+        document.getElementById('countJsonOnlyA').textContent = '(0)';
+        document.getElementById('countJsonOnlyB').textContent = '(0)';
+        document.getElementById('countJsonChanged').textContent = '(0)';
+        document.getElementById('countJsonSame').textContent = '(0)';
+      }
+
+      function compareJson(){
+        const a = validateJson(jsonA, statusA);
+        const b = validateJson(jsonB, statusB);
+        if(a === null || b === null){
+          showToast('Ambos JSONs deben ser validos para comparar');
+          return;
+        }
+        // Ensure both are objects for deep comparison
+        if(typeof a !== 'object' || typeof b !== 'object' || a === null || b === null){
+          // Primitive comparison
+          if(JSON.stringify(a) === JSON.stringify(b)){
+            clearJsonResults();
+            document.getElementById('jsonSame').textContent = JSON.stringify(a, null, 2);
+            document.getElementById('countJsonSame').textContent = '(1)';
+          } else {
+            clearJsonResults();
+            document.getElementById('jsonChanged').textContent = `${JSON.stringify(a)} → ${JSON.stringify(b)}`;
+            document.getElementById('countJsonChanged').textContent = '(1)';
+          }
+          return;
+        }
+        // Handle arrays at top level
+        if(Array.isArray(a) && Array.isArray(b)){
+          // Compare arrays element by element, treat indices as keys
+          const obj_a = {}, obj_b = {};
+          const maxLen = Math.max(a.length, b.length);
+          for(let i=0;i<maxLen;i++){
+            if(i < a.length) obj_a[`[${i}]`] = a[i];
+            if(i < b.length) obj_b[`[${i}]`] = b[i];
+          }
+          const result = diffObjects(obj_a, obj_b);
+          renderDiffResults(result);
+          return;
+        }
+        const result = diffObjects(a, b);
+        renderDiffResults(result);
+      }
+
+      function renderDiffResults(result){
+        document.getElementById('jsonOnlyA').textContent = result.onlyA.length ? result.onlyA.join('\n') : '(ninguno)';
+        document.getElementById('jsonOnlyB').textContent = result.onlyB.length ? result.onlyB.join('\n') : '(ninguno)';
+        document.getElementById('jsonChanged').textContent = result.changed.length ? result.changed.join('\n') : '(ninguno)';
+        document.getElementById('jsonSame').textContent = result.same.length ? result.same.join('\n') : '(ninguno)';
+        document.getElementById('countJsonOnlyA').textContent = `(${result.onlyA.length})`;
+        document.getElementById('countJsonOnlyB').textContent = `(${result.onlyB.length})`;
+        document.getElementById('countJsonChanged').textContent = `(${result.changed.length})`;
+        document.getElementById('countJsonSame').textContent = `(${result.same.length})`;
+      }
+
+      document.getElementById('compareJson').addEventListener('click', compareJson);
+
+      // Initial validation
+      validateJson(jsonA, statusA);
+      validateJson(jsonB, statusB);
+    })();
   </script>
 </body>
 </html>
