@@ -119,6 +119,11 @@
     #double-bets{background:transparent;border:1px solid rgba(255,255,255,0.2);color:#ccc}
     #double-bets:hover{border-color:#f0d060;color:#f0d060;transform:none;box-shadow:none}
     #total-bet-display{color:#f0d060;font-size:0.85rem;text-align:center;margin-top:6px}
+    #roulette-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:rgba(0,0,0,0.85);color:#f0d060;padding:8px 18px;border-radius:8px;border:1px solid #b8860b;font-size:0.85rem;font-weight:600;white-space:nowrap;z-index:10;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
+    #roulette-toast.show{opacity:1}
+    #roulette-toast.error{color:#f87171;border-color:#c0392b}
+    #roulette-toast.success{color:#4ade80;border-color:#27ae60}
+    #roulette-toast.info{color:#60a5fa;border-color:#3b82f6}
 
     @media(max-width:750px){
       #roulette-body{flex-direction:column}
@@ -188,6 +193,7 @@
           <div class="balance-display">Saldo: <span id="balance">1000</span> fichas</div>
           <button id="closeEgg">Cerrar</button>
         </div>
+        <div id="roulette-toast"></div>
         <div id="roulette-body">
           <div id="wheel-section">
             <div id="wheel-container">
@@ -566,6 +572,16 @@ Mandarina</textarea>
       const numColor = n => n===0?'green':RED_SET.has(n)?'red':'black';
       const numHex = n => n===0?'#27ae60':RED_SET.has(n)?'#c0392b':'#222';
 
+      // Roulette toast system
+      const rToast = document.getElementById('roulette-toast');
+      let rToastTimer = null;
+      function rouletteToast(msg, type='', ms=2500){
+        rToast.textContent = msg;
+        rToast.className = 'show' + (type ? ' '+type : '');
+        clearTimeout(rToastTimer);
+        rToastTimer = setTimeout(()=>{ rToast.className = ''; }, ms);
+      }
+
       // State
       let balance = 1000;
       let selectedChip = 1;
@@ -758,7 +774,7 @@ Mandarina</textarea>
       // ===== BET MANAGEMENT =====
       function placeBet(type,value,label,cell){
         if(spinning) return;
-        if(balance < selectedChip){ showToast('Saldo insuficiente'); return; }
+        if(balance < selectedChip){ rouletteToast('Saldo insuficiente para esta ficha','error'); return; }
         playChipPlace();
         // Check if same bet exists
         const existing = bets.find(b=>b.type===type && String(b.value)===String(value));
@@ -805,6 +821,7 @@ Mandarina</textarea>
           document.querySelectorAll('.chip-btn').forEach(b=>b.classList.remove('selected'));
           btn.classList.add('selected');
           selectedChip = parseInt(btn.dataset.value);
+          rouletteToast('Ficha de '+selectedChip+' seleccionada','info',1500);
         });
       });
 
@@ -812,15 +829,18 @@ Mandarina</textarea>
       document.getElementById('clear-bets').addEventListener('click',()=>{
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
+        if(totalBet === 0){ rouletteToast('No hay apuestas que limpiar',''); return; }
         balance += totalBet;
         bets = [];
         betHistory = [];
         updateUI();
+        rouletteToast('Apuestas retiradas. '+totalBet+' fichas devueltas','info');
       });
 
       // Undo last bet
       document.getElementById('undo-bet').addEventListener('click',()=>{
-        if(spinning || !betHistory.length) return;
+        if(spinning) return;
+        if(!betHistory.length){ rouletteToast('Nada que deshacer',''); return; }
         const totalBefore = bets.reduce((s,b)=>s+b.amount,0);
         bets = betHistory.pop();
         const totalAfter = bets.reduce((s,b)=>s+b.amount,0);
@@ -832,7 +852,8 @@ Mandarina</textarea>
       document.getElementById('double-bets').addEventListener('click',()=>{
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
-        if(totalBet === 0 || balance < totalBet){ showToast('Saldo insuficiente para doblar'); return; }
+        if(totalBet === 0){ rouletteToast('No hay apuestas para doblar','error'); return; }
+        if(balance < totalBet){ rouletteToast('Saldo insuficiente para doblar','error'); return; }
         betHistory.push(JSON.parse(JSON.stringify(bets)));
         bets.forEach(b=>b.amount*=2);
         balance -= totalBet;
@@ -900,10 +921,11 @@ Mandarina</textarea>
       function spin(){
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
-        if(totalBet === 0){ showToast('Coloca al menos una apuesta'); return; }
+        if(totalBet === 0){ rouletteToast('¡Coloca al menos una apuesta antes de girar!','error',3000); return; }
         spinning = true;
         spinBtn.disabled = true;
         resultEl.textContent = '';
+        rouletteToast('¡No va más! La rueda gira...','info',3000);
         ensureAudio();
 
         const duration = 6000 + Math.random()*2000;
@@ -1014,9 +1036,13 @@ Mandarina</textarea>
             if(totalWin > 0){
               resultEl.innerHTML += `<br><span style="color:#4ade80">+${totalWin} fichas</span>`;
               playWin();
+              if(totalWin >= 500) rouletteToast('¡Gran premio! +'+totalWin+' fichas','success',4000);
+              else rouletteToast('¡Has ganado +'+totalWin+' fichas!','success',3000);
             } else {
               resultEl.innerHTML += `<br><span style="color:#f87171">Sin premio</span>`;
               playLose();
+              if(balance === 0) rouletteToast('Te has quedado sin fichas... ¡Recarga!','error',4000);
+              else rouletteToast('Sin suerte esta vez. ¡Vuelve a apostar!','',2500);
             }
 
             // Update history
@@ -1053,9 +1079,14 @@ Mandarina</textarea>
 
       // Handlers
       title.style.cursor = 'pointer';
-      title.addEventListener('click', ()=>{ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); });
+      title.addEventListener('click', ()=>{ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); rouletteToast('Selecciona ficha y haz click en la mesa para apostar','info',4000); });
       closeBtn.addEventListener('click', ()=>{ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); });
       spinBtn.addEventListener('click', spin);
+      canvas.addEventListener('click', ()=>{
+        if(!spinning && bets.reduce((s,b)=>s+b.amount,0)===0){
+          rouletteToast('Primero coloca una apuesta en la mesa','info',3000);
+        }
+      });
       overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); } });
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); } });
     })();
