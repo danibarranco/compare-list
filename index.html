@@ -126,15 +126,20 @@
     #roulette-toast.info{color:#60a5fa;border-color:#3b82f6}
 
     @media(max-width:750px){
+      #egg-overlay{padding:0;align-items:stretch}
+      #egg-modal{max-width:100%;max-height:100vh;height:100vh;border-radius:0;border-width:0;box-shadow:none}
+      #egg-modal-header{padding:8px 12px;position:sticky;top:0;z-index:5}
       #roulette-body{flex-direction:column}
-      #wheel-section{flex:none;padding:12px}
-      #wheel-container{width:320px;height:320px;margin:0 auto}
-      #roulette,#ball-canvas{width:320px!important;height:320px!important}
+      #wheel-section{flex:none;padding:10px 4px}
+      #wheel-container{width:min(90vw,340px);height:min(90vw,340px);margin:0 auto}
+      #roulette,#ball-canvas{width:min(90vw,340px)!important;height:min(90vw,340px)!important}
       #table-section{padding:10px 6px}
       #betting-table{font-size:0.65rem;gap:1px}
       .bt-cell{padding:5px 1px;min-height:28px}
       .chip-btn{width:38px;height:38px;font-size:0.65rem}
-      #egg-modal{border-radius:12px;border-width:2px}
+      #roulette-toast{font-size:0.75rem;bottom:6px;padding:6px 12px}
+      #spin{padding:10px 24px;font-size:0.9rem;margin-top:8px}
+      #roulette-history{max-width:90vw}
     }
     /* Tab navigation */
     .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid color-mix(in srgb,var(--surface) 60%, black 6%);padding-bottom:0}
