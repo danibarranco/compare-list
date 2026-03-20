@@ -73,8 +73,8 @@
     #closeEgg{background:#8b0000;color:#fff;border:1px solid #600;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer}
     #closeEgg:hover{background:#a00;transform:none;box-shadow:none}
     #roulette-body{display:flex;gap:0;flex-direction:row;align-items:stretch}
-    #wheel-section{flex:0 0 340px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;background:linear-gradient(135deg,#0d2818,#1a472a)}
-    #wheel-container{position:relative;width:300px;height:300px}
+    #wheel-section{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;background:linear-gradient(135deg,#0d2818,#1a472a)}
+    #wheel-container{position:relative;width:380px;height:380px}
     #roulette{border-radius:50%;display:block;cursor:pointer}
     #ball-canvas{position:absolute;top:0;left:0;border-radius:50%;pointer-events:none}
     #spin{display:block;margin:12px auto 0;padding:12px 32px;font-size:1rem;font-weight:700;letter-spacing:1px;background:linear-gradient(180deg,#d4af37,#b8860b);color:#1a0f0a;border:2px solid #f0d060;border-radius:10px;cursor:pointer;text-transform:uppercase;transition:all .15s}
@@ -119,17 +119,27 @@
     #double-bets{background:transparent;border:1px solid rgba(255,255,255,0.2);color:#ccc}
     #double-bets:hover{border-color:#f0d060;color:#f0d060;transform:none;box-shadow:none}
     #total-bet-display{color:#f0d060;font-size:0.85rem;text-align:center;margin-top:6px}
+    #roulette-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:rgba(0,0,0,0.85);color:#f0d060;padding:8px 18px;border-radius:8px;border:1px solid #b8860b;font-size:0.85rem;font-weight:600;white-space:nowrap;z-index:10;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
+    #roulette-toast.show{opacity:1}
+    #roulette-toast.error{color:#f87171;border-color:#c0392b}
+    #roulette-toast.success{color:#4ade80;border-color:#27ae60}
+    #roulette-toast.info{color:#60a5fa;border-color:#3b82f6}
 
     @media(max-width:750px){
+      #egg-overlay{padding:0;align-items:stretch}
+      #egg-modal{max-width:100%;max-height:100vh;height:100vh;border-radius:0;border-width:0;box-shadow:none}
+      #egg-modal-header{padding:8px 12px;position:sticky;top:0;z-index:5}
       #roulette-body{flex-direction:column}
-      #wheel-section{flex:none;padding:12px}
-      #wheel-container{width:260px;height:260px;margin:0 auto}
-      #roulette,#ball-canvas{width:260px!important;height:260px!important}
+      #wheel-section{flex:none;padding:10px 4px}
+      #wheel-container{width:min(90vw,340px);height:min(90vw,340px);margin:0 auto}
+      #roulette,#ball-canvas{width:min(90vw,340px)!important;height:min(90vw,340px)!important}
       #table-section{padding:10px 6px}
       #betting-table{font-size:0.65rem;gap:1px}
       .bt-cell{padding:5px 1px;min-height:28px}
       .chip-btn{width:38px;height:38px;font-size:0.65rem}
-      #egg-modal{border-radius:12px;border-width:2px}
+      #roulette-toast{font-size:0.75rem;bottom:6px;padding:6px 12px}
+      #spin{padding:10px 24px;font-size:0.9rem;margin-top:8px}
+      #roulette-history{max-width:90vw}
     }
     /* Tab navigation */
     .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid color-mix(in srgb,var(--surface) 60%, black 6%);padding-bottom:0}
@@ -188,11 +198,12 @@
           <div class="balance-display">Saldo: <span id="balance">1000</span> fichas</div>
           <button id="closeEgg">Cerrar</button>
         </div>
+        <div id="roulette-toast"></div>
         <div id="roulette-body">
           <div id="wheel-section">
             <div id="wheel-container">
-              <canvas id="roulette" width="300" height="300"></canvas>
-              <canvas id="ball-canvas" width="300" height="300"></canvas>
+              <canvas id="roulette" width="380" height="380"></canvas>
+              <canvas id="ball-canvas" width="380" height="380"></canvas>
             </div>
             <button id="spin">GIRAR</button>
             <div id="roulette-result" aria-live="polite"></div>
@@ -566,6 +577,16 @@ Mandarina</textarea>
       const numColor = n => n===0?'green':RED_SET.has(n)?'red':'black';
       const numHex = n => n===0?'#27ae60':RED_SET.has(n)?'#c0392b':'#222';
 
+      // Roulette toast system
+      const rToast = document.getElementById('roulette-toast');
+      let rToastTimer = null;
+      function rouletteToast(msg, type='', ms=2500){
+        rToast.textContent = msg;
+        rToast.className = 'show' + (type ? ' '+type : '');
+        clearTimeout(rToastTimer);
+        rToastTimer = setTimeout(()=>{ rToast.className = ''; }, ms);
+      }
+
       // State
       let balance = 1000;
       let selectedChip = 1;
@@ -642,8 +663,8 @@ Mandarina</textarea>
           ctx.strokeStyle='#b8860b';ctx.lineWidth=0.5;ctx.stroke();
           // Number label
           ctx.save();ctx.rotate(start+seg/2);
-          ctx.fillStyle='#fff';ctx.font='bold 10px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-          ctx.fillText(String(WHEEL_ORDER[i]),R-18,0);
+          ctx.fillStyle='#fff';ctx.font='bold 12px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(String(WHEEL_ORDER[i]),R-22,0);
           ctx.restore();
         }
         // Inner decorative rings
@@ -671,20 +692,29 @@ Mandarina</textarea>
 
       // ===== BALL ANIMATION =====
       const bctx = ballCanvas.getContext('2d');
-      let ballAngle=0, ballRadius=R-6, ballVisible=false;
+      let ballAngle=0, ballRadius=R+2, ballVisible=false;
 
       function drawBall(){
         bctx.clearRect(0,0,W,H);
         if(!ballVisible) return;
         const bx = cx + Math.cos(ballAngle)*ballRadius;
         const by = cy + Math.sin(ballAngle)*ballRadius;
+        const ballR = 7;
+        // Outer glow
+        const glow = bctx.createRadialGradient(bx,by,ballR,bx,by,ballR*3);
+        glow.addColorStop(0,'rgba(255,255,255,0.35)');glow.addColorStop(1,'rgba(255,255,255,0)');
+        bctx.beginPath();bctx.arc(bx,by,ballR*3,0,Math.PI*2);bctx.fillStyle=glow;bctx.fill();
         // Shadow
-        bctx.beginPath();bctx.arc(bx+1,by+1,5,0,Math.PI*2);bctx.fillStyle='rgba(0,0,0,0.4)';bctx.fill();
-        // Ball
-        const bg=bctx.createRadialGradient(bx-1,by-1,1,bx,by,5);
-        bg.addColorStop(0,'#fff');bg.addColorStop(0.5,'#ddd');bg.addColorStop(1,'#aaa');
-        bctx.beginPath();bctx.arc(bx,by,4.5,0,Math.PI*2);bctx.fillStyle=bg;bctx.fill();
-        bctx.strokeStyle='rgba(0,0,0,0.2)';bctx.lineWidth=0.5;bctx.stroke();
+        bctx.beginPath();bctx.arc(bx+2,by+2,ballR,0,Math.PI*2);bctx.fillStyle='rgba(0,0,0,0.5)';bctx.fill();
+        // Ball body
+        const bg=bctx.createRadialGradient(bx-2,by-2,1,bx,by,ballR);
+        bg.addColorStop(0,'#ffffff');bg.addColorStop(0.3,'#f0f0f0');bg.addColorStop(0.7,'#c0c0c0');bg.addColorStop(1,'#888');
+        bctx.beginPath();bctx.arc(bx,by,ballR,0,Math.PI*2);bctx.fillStyle=bg;bctx.fill();
+        bctx.strokeStyle='rgba(0,0,0,0.3)';bctx.lineWidth=1;bctx.stroke();
+        // Specular highlight
+        const spec=bctx.createRadialGradient(bx-2,by-3,0.5,bx-2,by-3,ballR*0.5);
+        spec.addColorStop(0,'rgba(255,255,255,0.9)');spec.addColorStop(1,'rgba(255,255,255,0)');
+        bctx.beginPath();bctx.arc(bx-2,by-3,ballR*0.5,0,Math.PI*2);bctx.fillStyle=spec;bctx.fill();
       }
 
       // ===== BETTING TABLE =====
@@ -749,7 +779,7 @@ Mandarina</textarea>
       // ===== BET MANAGEMENT =====
       function placeBet(type,value,label,cell){
         if(spinning) return;
-        if(balance < selectedChip){ showToast('Saldo insuficiente'); return; }
+        if(balance < selectedChip){ rouletteToast('Saldo insuficiente para esta ficha','error'); return; }
         playChipPlace();
         // Check if same bet exists
         const existing = bets.find(b=>b.type===type && String(b.value)===String(value));
@@ -796,6 +826,7 @@ Mandarina</textarea>
           document.querySelectorAll('.chip-btn').forEach(b=>b.classList.remove('selected'));
           btn.classList.add('selected');
           selectedChip = parseInt(btn.dataset.value);
+          rouletteToast('Ficha de '+selectedChip+' seleccionada','info',1500);
         });
       });
 
@@ -803,15 +834,18 @@ Mandarina</textarea>
       document.getElementById('clear-bets').addEventListener('click',()=>{
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
+        if(totalBet === 0){ rouletteToast('No hay apuestas que limpiar',''); return; }
         balance += totalBet;
         bets = [];
         betHistory = [];
         updateUI();
+        rouletteToast('Apuestas retiradas. '+totalBet+' fichas devueltas','info');
       });
 
       // Undo last bet
       document.getElementById('undo-bet').addEventListener('click',()=>{
-        if(spinning || !betHistory.length) return;
+        if(spinning) return;
+        if(!betHistory.length){ rouletteToast('Nada que deshacer',''); return; }
         const totalBefore = bets.reduce((s,b)=>s+b.amount,0);
         bets = betHistory.pop();
         const totalAfter = bets.reduce((s,b)=>s+b.amount,0);
@@ -823,7 +857,8 @@ Mandarina</textarea>
       document.getElementById('double-bets').addEventListener('click',()=>{
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
-        if(totalBet === 0 || balance < totalBet){ showToast('Saldo insuficiente para doblar'); return; }
+        if(totalBet === 0){ rouletteToast('No hay apuestas para doblar','error'); return; }
+        if(balance < totalBet){ rouletteToast('Saldo insuficiente para doblar','error'); return; }
         betHistory.push(JSON.parse(JSON.stringify(bets)));
         bets.forEach(b=>b.amount*=2);
         balance -= totalBet;
@@ -876,117 +911,115 @@ Mandarina</textarea>
       }
 
       // ===== SPIN =====
+      // Helper: determine which sector the pointer points to given a wheel angle
+      function getWinFromAngle(wAngle){
+        const sectorArc = (2*Math.PI)/37;
+        // Pointer is at -PI/2 in world space. In wheel-local space: -PI/2 - wAngle
+        // Sectors start at -PI/2 in wheel-local space, so offset is just -wAngle
+        let localPointer = (-wAngle) % (2*Math.PI);
+        if(localPointer < 0) localPointer += 2*Math.PI;
+        const idx = Math.floor(localPointer / sectorArc) % 37;
+        return { idx, num: WHEEL_ORDER[idx] };
+      }
+
       let wheelAngle = 0;
       function spin(){
         if(spinning) return;
         const totalBet = bets.reduce((s,b)=>s+b.amount,0);
-        if(totalBet === 0){ showToast('Coloca al menos una apuesta'); return; }
+        if(totalBet === 0){ rouletteToast('¡Coloca al menos una apuesta antes de girar!','error',3000); return; }
         spinning = true;
         spinBtn.disabled = true;
         resultEl.textContent = '';
+        rouletteToast('¡No va más! La rueda gira...','info',3000);
         ensureAudio();
-
-        // Pick winning number
-        const winIdx = Math.floor(Math.random()*37);
-        const winNum = WHEEL_ORDER[winIdx];
 
         const duration = 6000 + Math.random()*2000;
         const startTime = performance.now();
         const startWheelAngle = wheelAngle;
-
-        // Wheel: total rotation so pointer lands on winning sector
-        // Pointer is at top (-PI/2). Wheel rotates clockwise.
-        // Sector center angle on static wheel: winIdx * (2PI/37), measured from -PI/2
         const sectorArc = (2*Math.PI)/37;
-        const targetSectorCenter = winIdx * sectorArc;
-        // We want the wheel to rotate so that this sector is under the pointer
-        // Add full rotations for visual effect
-        const wheelFullSpins = (5 + Math.floor(Math.random()*3)) * 2 * Math.PI;
-        const totalWheelRotation = wheelFullSpins + targetSectorCenter + (Math.random()-0.5)*sectorArc*0.6;
 
-        // Ball: spins opposite direction, starts fast, decelerates, then drops in
-        // Total ball travel (in radians, negative = opposite to wheel)
-        const ballFullSpins = (7 + Math.floor(Math.random()*3)) * 2 * Math.PI;
-        // Ball final angle: needs to be at the winning sector relative to the wheel
-        // In world space, the winning sector after wheel rotation is at:
-        // startWheelAngle + totalWheelRotation maps sector winIdx to the pointer
-        // Ball just needs to visually be at that same spot
+        // Wheel: random total rotation (many full spins + random landing)
+        const totalWheelRotation = (5 + Math.floor(Math.random()*3)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
         const finalWheelAngle = startWheelAngle + totalWheelRotation;
-        const finalBallWorldAngle = -Math.PI/2; // at the pointer (top)
-        // Ball starts at a random angle and travels negative direction, ending at finalBallWorldAngle
+
+        // Determine winning number from where wheel actually stops
+        const win = getWinFromAngle(finalWheelAngle);
+        const winIdx = win.idx;
+        const winNum = win.num;
+
+        // Ball: ends at the pointer position (-PI/2, top of wheel)
+        // where the winning sector will be
+        const finalBallAngle = -Math.PI/2;
         const startBallAngle = Math.random() * Math.PI * 2;
-        // Compute total ball rotation so it ends at the right spot
-        // ball goes negative (counter-clockwise), total must end at finalBallWorldAngle mod 2PI
-        let ballTotalRotation = -(ballFullSpins);
-        // Adjust so final angle = startBallAngle + ballTotalRotation ≡ finalBallWorldAngle
+        // Ball spins opposite direction (counter-clockwise) many times, then lands at pointer
+        let ballTotalRotation = -(7 + Math.floor(Math.random()*3)) * 2 * Math.PI;
+        // Adjust so startBallAngle + ballTotalRotation = finalBallAngle (mod 2PI)
         let rawEnd = startBallAngle + ballTotalRotation;
-        let diff = finalBallWorldAngle - rawEnd;
-        // Normalize diff into [-PI, PI]
-        diff = diff - Math.round(diff / (2*Math.PI)) * 2 * Math.PI;
-        ballTotalRotation += diff;
+        let angleDiff = finalBallAngle - rawEnd;
+        angleDiff = angleDiff - Math.round(angleDiff / (2*Math.PI)) * 2 * Math.PI;
+        ballTotalRotation += angleDiff;
 
         ballVisible = true;
-        const startBallRadius = R - 6;
-        const endBallRadius = R * 0.62;
+        const outerBallR = R + 2;
+        const pocketBallR = R - 22;
 
-        // Ball physics phases:
-        // Phase 1 (0-55%): ball orbits on outer track, fast to slow
-        // Phase 2 (55-75%): ball spirals inward with bounces
-        // Phase 3 (75-100%): ball settles in pocket, small oscillations
-
-        // Schedule ticks (slowing down)
+        // Schedule ticks
         const tickStart = audioCtx.currentTime + 0.05;
-        const tickCount = Math.floor(duration / 80);
+        const tickCount = Math.floor(duration / 90);
         for(let i=0;i<tickCount;i++){
           const t = i/(tickCount-1);
           const time = tickStart + (duration/1000) * (1 - Math.pow(1-t, 4));
           playTick(time, 0.02 + 0.03*(1-t));
         }
-        // Schedule bounce sounds when ball drops in
-        const bounceTime = tickStart + (duration/1000)*0.6;
-        [0, 0.15, 0.25, 0.32].forEach(dt => {
+        // Bounce sounds when ball drops
+        const bounceTime = tickStart + (duration/1000)*0.58;
+        [0, 0.12, 0.22, 0.28].forEach(dt => {
           const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-          o.type='sine'; o.frequency.setValueAtTime(400 - dt*300, bounceTime+dt);
-          g.gain.setValueAtTime(0.12 - dt*0.2, bounceTime+dt);
-          g.gain.exponentialRampToValueAtTime(0.001, bounceTime+dt+0.1);
+          o.type='sine'; o.frequency.setValueAtTime(500 - dt*400, bounceTime+dt);
+          g.gain.setValueAtTime(Math.max(0.01, 0.15 - dt*0.3), bounceTime+dt);
+          g.gain.exponentialRampToValueAtTime(0.001, bounceTime+dt+0.08);
           o.connect(g); g.connect(audioCtx.destination);
-          o.start(bounceTime+dt); o.stop(bounceTime+dt+0.12);
+          o.start(bounceTime+dt); o.stop(bounceTime+dt+0.1);
         });
 
         function frame(now){
           const elapsed = now - startTime;
           const t = Math.min(1, elapsed / duration);
 
-          // Wheel easing: quintic ease-out for smooth deceleration
+          // Wheel: quartic ease-out
           const wheelEase = 1 - Math.pow(1-t, 4);
           wheelAngle = startWheelAngle + totalWheelRotation * wheelEase;
           drawWheel(wheelAngle);
 
-          // Ball angle easing: separate curve, starts fast, ends matching wheel
-          // Use a steeper ease-out so ball decelerates faster than wheel initially
-          const ballEase = t < 0.55
-            ? (t/0.55) * 0.65  // linear-ish fast phase (covers 65% of rotation)
-            : 0.65 + 0.35 * (1 - Math.pow(1 - (t-0.55)/0.45, 3)); // ease-out rest
+          // Ball angle: starts fast, decelerates smoothly
+          // Two-phase easing for natural deceleration
+          let ballEase;
+          if(t < 0.5){
+            // Fast phase: covers ~60% of rotation
+            ballEase = (t / 0.5) * 0.6;
+          } else {
+            // Slow phase: ease-out for remaining 40%
+            const st = (t - 0.5) / 0.5;
+            ballEase = 0.6 + 0.4 * (1 - Math.pow(1 - st, 3));
+          }
           ballAngle = startBallAngle + ballTotalRotation * ballEase;
 
-          // Ball radius: stays on track, then drops with bounces
-          if(t < 0.55){
-            // On outer track
-            ballRadius = startBallRadius;
-          } else if(t < 0.75){
-            // Dropping in with bounce effect
-            const dropT = (t - 0.55) / 0.20;
-            const baseRadius = startBallRadius - (startBallRadius - endBallRadius) * dropT;
-            // Add bounces: damped sine wave
-            const bounceAmp = (startBallRadius - endBallRadius) * 0.15 * (1 - dropT);
-            const bounceFreq = 3; // number of bounces
-            const bounce = Math.abs(Math.sin(dropT * Math.PI * bounceFreq)) * bounceAmp;
-            ballRadius = baseRadius + bounce;
+          // Ball radius phases
+          if(t < 0.5){
+            // Orbiting outer track
+            ballRadius = outerBallR;
+          } else if(t < 0.72){
+            // Dropping in with damped bounces
+            const dropT = (t - 0.5) / 0.22;
+            const base = outerBallR - (outerBallR - pocketBallR) * dropT;
+            const amp = (outerBallR - pocketBallR) * 0.18 * Math.pow(1 - dropT, 1.5);
+            const bounce = Math.abs(Math.sin(dropT * Math.PI * 3.5)) * amp;
+            ballRadius = base + bounce;
           } else {
-            // Settled in pocket with tiny wobble
-            const settleT = (t - 0.75) / 0.25;
-            const wobble = Math.sin(settleT * Math.PI * 4) * 2 * (1 - settleT);
-            ballRadius = endBallRadius + wobble;
+            // Settled with damping wobble
+            const settleT = (t - 0.72) / 0.28;
+            const wobble = Math.sin(settleT * Math.PI * 5) * 1.5 * Math.pow(1 - settleT, 2);
+            ballRadius = pocketBallR + wobble;
           }
 
           drawBall();
@@ -994,11 +1027,12 @@ Mandarina</textarea>
           if(t < 1){
             requestAnimationFrame(frame);
           } else {
-            // Final position — already correct from easing
-            ballRadius = endBallRadius;
+            // Final position
+            ballAngle = finalBallAngle;
+            ballRadius = pocketBallR;
             drawBall();
 
-            // Evaluate
+            // Evaluate using the number determined by where wheel actually stopped
             const totalWin = evaluateBets(winNum);
             balance += totalWin;
             const color = numColor(winNum);
@@ -1007,9 +1041,13 @@ Mandarina</textarea>
             if(totalWin > 0){
               resultEl.innerHTML += `<br><span style="color:#4ade80">+${totalWin} fichas</span>`;
               playWin();
+              if(totalWin >= 500) rouletteToast('¡Gran premio! +'+totalWin+' fichas','success',4000);
+              else rouletteToast('¡Has ganado +'+totalWin+' fichas!','success',3000);
             } else {
               resultEl.innerHTML += `<br><span style="color:#f87171">Sin premio</span>`;
               playLose();
+              if(balance === 0) rouletteToast('Te has quedado sin fichas... ¡Recarga!','error',4000);
+              else rouletteToast('Sin suerte esta vez. ¡Vuelve a apostar!','',2500);
             }
 
             // Update history
@@ -1024,9 +1062,6 @@ Mandarina</textarea>
 
             spinning = false;
             spinBtn.disabled = false;
-
-            // Hide ball after a moment
-            setTimeout(()=>{ ballVisible=false; drawBall(); },3000);
           }
         }
         requestAnimationFrame(frame);
@@ -1049,9 +1084,14 @@ Mandarina</textarea>
 
       // Handlers
       title.style.cursor = 'pointer';
-      title.addEventListener('click', ()=>{ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); });
+      title.addEventListener('click', ()=>{ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); rouletteToast('Selecciona ficha y haz click en la mesa para apostar','info',4000); });
       closeBtn.addEventListener('click', ()=>{ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); });
       spinBtn.addEventListener('click', spin);
+      canvas.addEventListener('click', ()=>{
+        if(!spinning && bets.reduce((s,b)=>s+b.amount,0)===0){
+          rouletteToast('Primero coloca una apuesta en la mesa','info',3000);
+        }
+      });
       overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); } });
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ overlay.style.display='none'; overlay.setAttribute('aria-hidden','true'); } });
     })();
