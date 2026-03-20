@@ -73,8 +73,8 @@
     #closeEgg{background:#8b0000;color:#fff;border:1px solid #600;padding:6px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer}
     #closeEgg:hover{background:#a00;transform:none;box-shadow:none}
     #roulette-body{display:flex;gap:0;flex-direction:row;align-items:stretch}
-    #wheel-section{flex:0 0 340px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;background:linear-gradient(135deg,#0d2818,#1a472a)}
-    #wheel-container{position:relative;width:300px;height:300px}
+    #wheel-section{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;background:linear-gradient(135deg,#0d2818,#1a472a)}
+    #wheel-container{position:relative;width:380px;height:380px}
     #roulette{border-radius:50%;display:block;cursor:pointer}
     #ball-canvas{position:absolute;top:0;left:0;border-radius:50%;pointer-events:none}
     #spin{display:block;margin:12px auto 0;padding:12px 32px;font-size:1rem;font-weight:700;letter-spacing:1px;background:linear-gradient(180deg,#d4af37,#b8860b);color:#1a0f0a;border:2px solid #f0d060;border-radius:10px;cursor:pointer;text-transform:uppercase;transition:all .15s}
@@ -123,8 +123,8 @@
     @media(max-width:750px){
       #roulette-body{flex-direction:column}
       #wheel-section{flex:none;padding:12px}
-      #wheel-container{width:260px;height:260px;margin:0 auto}
-      #roulette,#ball-canvas{width:260px!important;height:260px!important}
+      #wheel-container{width:320px;height:320px;margin:0 auto}
+      #roulette,#ball-canvas{width:320px!important;height:320px!important}
       #table-section{padding:10px 6px}
       #betting-table{font-size:0.65rem;gap:1px}
       .bt-cell{padding:5px 1px;min-height:28px}
@@ -191,8 +191,8 @@
         <div id="roulette-body">
           <div id="wheel-section">
             <div id="wheel-container">
-              <canvas id="roulette" width="300" height="300"></canvas>
-              <canvas id="ball-canvas" width="300" height="300"></canvas>
+              <canvas id="roulette" width="380" height="380"></canvas>
+              <canvas id="ball-canvas" width="380" height="380"></canvas>
             </div>
             <button id="spin">GIRAR</button>
             <div id="roulette-result" aria-live="polite"></div>
@@ -642,8 +642,8 @@ Mandarina</textarea>
           ctx.strokeStyle='#b8860b';ctx.lineWidth=0.5;ctx.stroke();
           // Number label
           ctx.save();ctx.rotate(start+seg/2);
-          ctx.fillStyle='#fff';ctx.font='bold 10px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-          ctx.fillText(String(WHEEL_ORDER[i]),R-18,0);
+          ctx.fillStyle='#fff';ctx.font='bold 12px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(String(WHEEL_ORDER[i]),R-22,0);
           ctx.restore();
         }
         // Inner decorative rings
@@ -671,7 +671,7 @@ Mandarina</textarea>
 
       // ===== BALL ANIMATION =====
       const bctx = ballCanvas.getContext('2d');
-      let ballAngle=0, ballRadius=R-6, ballVisible=false;
+      let ballAngle=0, ballRadius=R+2, ballVisible=false;
 
       function drawBall(){
         bctx.clearRect(0,0,W,H);
@@ -933,8 +933,8 @@ Mandarina</textarea>
         ballTotalRotation += angleDiff;
 
         ballVisible = true;
-        const outerBallR = R - 8;
-        const pocketBallR = R * 0.68;
+        const outerBallR = R + 2;
+        const pocketBallR = R - 22;
 
         // Schedule ticks
         const tickStart = audioCtx.currentTime + 0.05;
@@ -1031,9 +1031,6 @@ Mandarina</textarea>
 
             spinning = false;
             spinBtn.disabled = false;
-
-            // Hide ball after a moment
-            setTimeout(()=>{ ballVisible=false; drawBall(); },3000);
           }
         }
         requestAnimationFrame(frame);
